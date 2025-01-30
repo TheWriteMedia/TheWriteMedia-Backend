@@ -9,7 +9,7 @@ return [
         'mongodb' => [
             'driver'   => 'mongodb',
             'dsn'      => env('MONGODB_URI'),
-            'database' => env('MONGODB_DATABASE', 'WeatherSafeDb'),
+            'database' => env('MONGODB_DATABASE', 'TheWriteMediaDb'),
         ],
     ],
     'migrations' => [
