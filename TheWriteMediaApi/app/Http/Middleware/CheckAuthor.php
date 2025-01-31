@@ -16,9 +16,11 @@ class CheckAuthor
      */
     public function handle(Request $request, Closure $next)
     {
-        // Check if the authenticated user is an app admin
-        if (Auth::user() && Auth::user()->user_type !== \App\Models\User::USER_TYPE_AUTHOR) {
-            return response()->json(['message' => 'Access denied. Only authors can perform this action.'], 403);
+        $user = Auth::user();
+
+        // Check if the user is authenticated and is an author with ACTIVE status
+        if (!$user || $user->user_type !== \App\Models\User::USER_TYPE_AUTHOR || $user->status !== 'ACTIVE') {
+            return response()->json(['message' => 'Access denied. Only active authors can perform this action.'], 403);
         }
 
         return $next($request);
