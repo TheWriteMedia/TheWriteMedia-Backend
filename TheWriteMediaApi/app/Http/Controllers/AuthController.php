@@ -168,7 +168,7 @@ class AuthController extends Controller
 
     // Store the token in the password_resets collection
     PasswordReset::updateOrCreate(
-        ['email' => $request->user_email],
+        ['user_email' => $request->user_email],
         ['token' => $token, 'created_at' => now()]
     );
 

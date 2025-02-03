@@ -10,7 +10,7 @@ class PasswordReset extends Model
     protected $collection = 'password_reset_tokens'; // Specify the MongoDB collection
 
     protected $fillable = [
-        'email',
+        'user_email',
         'token',
         'created_at',
     ];

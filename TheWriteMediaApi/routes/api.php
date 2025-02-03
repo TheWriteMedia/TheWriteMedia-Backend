@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 
           //FORGOT PASSWORD
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     
         Route::get('/user', function (Request $request) {
             return $request->user();    
