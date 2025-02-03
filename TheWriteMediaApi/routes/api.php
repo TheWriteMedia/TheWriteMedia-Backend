@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\NewsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -10,10 +11,17 @@ use Illuminate\Support\Facades\Route;
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+          //FORGOT PASSWORD
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     
         Route::get('/user', function (Request $request) {
-            return $request->user();
+            return $request->user();    
         })->middleware('auth:sanctum');
+
+        Route::middleware(['auth:sanctum'])->get('/user/profile', [AuthController::class, 'getProfile']);
+        Route::middleware(['auth:sanctum'])->put('/user/profile', [AuthController::class, 'updateProfile']);
+
     
 
         //WEB ADMIN ROUTES
@@ -36,6 +44,14 @@ use Illuminate\Support\Facades\Route;
             Route::get('/author/dashboard', function () {
                 return response()->json(['message' => 'Welcome Author! Your middleware is working.']);
             });
+
+             //BOOK MANAGEMENT ROUTES
+             Route::get('/author/books', action: [BookController::class, 'index']); // show all news
+             Route::post('/author/books', [BookController::class, 'store']); // Create a new news
+             Route::get('/author/books/{book}', [BookController::class, 'show']); // Show a specific news 
+             Route::put('/author/books/{book}', [BookController::class, 'update']); // Update an news 
+             Route::delete('/author/books/{book}', [BookController::class, 'destroy']); // Delete an news 
+             Route::patch('author/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an news
 
             //NEWS MANAGEMENT ROUTES
             Route::get('/author/news', action: [NewsController::class, 'index']); // show all news
