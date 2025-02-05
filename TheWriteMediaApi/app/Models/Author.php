@@ -21,6 +21,11 @@ class Author extends Model
         'author_sex'
     ];
 
+    // Author Model
+protected $casts = [
+    '_id' => 'string',  // You might want to cast it to string if you are using object IDs
+];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthorController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
@@ -85,11 +86,11 @@ class AuthorController extends Controller
 
     // Validate the incoming request
     $fields = $request->validate([
-        'author_name' => 'sometimes|string|max:255',
-        'author_country' => 'sometimes|string|max:255',
-        'author_age' => 'sometimes|string|max:255',
-        'author_sex' => 'sometimes|string|max:255',
-        'user_email' => 'sometimes|email|unique:users,email,' . $user->id,
+        'author_name' => 'required|string|max:255',
+        'author_country' => 'required|string|max:255',
+        'author_age' => 'required|string|max:255',
+        'author_sex' => 'required|string|max:255',
+        'user_email' => 'required|email|unique:users,email,' . $user->id,
         'user_password' => 'nullable|confirmed|min:8',
     ]);
 

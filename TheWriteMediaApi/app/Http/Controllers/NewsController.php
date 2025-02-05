@@ -14,7 +14,6 @@ class NewsController extends Controller
     {
         // Get all active news (with their related user data)
     $news = News::with('user')->where('status', 'ACTIVE')->latest()->get();
-    
     return response()->json([
         'news' => $news
     ]);
@@ -77,29 +76,23 @@ class NewsController extends Controller
 {
     // Validate only the fields provided in the request
     $fields = $request->validate([
-        'news_title' => 'sometimes|string|max:255',
-        'news_description' => 'sometimes|string|max:255',
-        'news_plugs' => 'sometimes|array',  // Validate as an array
+        'news_title' => 'required|string|max:255',
+        'news_description' => 'required|string|max:255',
+        'news_plugs' => 'required|array',  // Validate as an array
         'news_plugs.*' => 'string',          // Ensure each item in the array is a string
-        'img_urls' => 'sometimes|array',    // Validate as an array
+        'img_urls' => 'required|array',    // Validate as an array
         'img_urls.*' => 'string',            // Ensure each item in the array is a string
     ]);
 
     // No need to explicitly find the news since it's passed as a route model binding
 
-    // Only update the fields that were provided in the request
-    $news->update(array_filter([
-        'news_title' => $request->news_title ?? $news->news_title,
-        'news_description' => $request->news_description ?? $news->news_description,
-        'news_plugs' => $request->news_plugs ?? $news->news_plugs,
-        'img_urls' => $request->img_urls ?? $news->img_urls,
-        'status' => $news->status,  // Retain the existing status or update it if required
-    ]));
+     // Update book details
+     $news->update($fields);
 
     return response()->json([
         'message' => 'News updated successfully.',
         'news' => $news
-    ]);
+    ], 200);
 }
     /**
      * Remove the specified resource from storage.
