@@ -10,15 +10,24 @@ class NewsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Get all active news (with their related user data)
-    $news = News::with('user')->where('status', 'ACTIVE')->latest()->get();
+    // Get the currently authenticated user
+    $user = $request->user();
+
+    // Check the user type
+    if ($user->user_type === 'web_admin') {
+        // If the user is a web_admin, show all books (active and inactive)
+        $news = News::with('user')->latest()->get();
+    } else {
+        // If the user is an author, show only active books
+        $news = News::with('user')->where('status', 'ACTIVE')->latest()->get();
+    }
+
     return response()->json([
         'news' => $news
     ]);
     }
-
     /**
      * Store a newly created resource in storage.
      */
@@ -50,25 +59,27 @@ class NewsController extends Controller
                 'news' => $news
             ], 201);
     }
-
     /**
      * Display the specified resource.
      */
-    public function show(News $news)
+    public function show(Request $request, News $news)
     {
-        // Ensure the news has an 'ACTIVE' status before returning it
-        if ($news->status !== 'ACTIVE') {
-            return response()->json([
-                'message' => 'News not found or is inactive.',
-            ], 404);
-        }
+   
+          // Get the currently authenticated user
+          $user = $request->user();
     
-        // Return the news with its related user data
-        return response()->json([
-            'news' => $news->load('user')
-        ]);
+          // If the user is an author and the book is inactive, deny access
+          if ($user->user_type === 'author' && $news->status !== 'ACTIVE') {
+              return response()->json([
+                  'message' => 'News not found or is inactive.',
+              ], 404);
+          }
+      
+          // Return the book with its related user data
+          return response()->json([
+              'news' => $news->load('user')
+          ]);
     }
-
     /**
      * Update the specified resource in storage.
      */

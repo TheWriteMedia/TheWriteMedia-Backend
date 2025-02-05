@@ -18,12 +18,14 @@ class Author extends Model
         'author_name',
         'author_country',
         'author_age',
-        'author_sex'
+        'author_sex',
+        'profile_picture',
     ];
 
     // Author Model
 protected $casts = [
     '_id' => 'string',  // You might want to cast it to string if you are using object IDs
+    'profile_picture' => 'string',
 ];
 
     public function user()

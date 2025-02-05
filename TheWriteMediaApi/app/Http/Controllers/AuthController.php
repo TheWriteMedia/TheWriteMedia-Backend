@@ -24,10 +24,10 @@ class AuthController extends Controller
 
     
         // Update the author's data if the user is an author
-if ($user->user_type === 'author') {
-        // Load the associated author data (if any)
-        $user->load('author');
-}
+    if ($user->user_type === 'author') {
+            // Load the associated author data (if any)
+            $user->load('author');
+    }
 
         // Return the user and author data
         return response()->json([
