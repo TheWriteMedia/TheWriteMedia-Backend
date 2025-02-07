@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\News;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
@@ -16,7 +17,7 @@ class NewsController extends Controller
     $user = $request->user();
 
     // Check the user type
-    if ($user->user_type === 'web_admin') {
+    if ($user->user_type === User::USER_TYPE_WEB_ADMIN) {
         // If the user is a web_admin, show all books (active and inactive)
         $news = News::with('user')->latest()->get();
     } else {
@@ -64,21 +65,26 @@ class NewsController extends Controller
      */
     public function show(Request $request, News $news)
     {
-   
-          // Get the currently authenticated user
-          $user = $request->user();
+    // Get the currently authenticated user
+    $user = $request->user();
     
-          // If the user is an author and the book is inactive, deny access
-          if ($user->user_type === 'author' && $news->status !== 'ACTIVE') {
-              return response()->json([
-                  'message' => 'News not found or is inactive.',
-              ], 404);
-          }
-      
-          // Return the book with its related user data
-          return response()->json([
-              'news' => $news->load('user')
-          ]);
+    // If the user is a web_admin, allow access to all books (ACTIVE & INACTIVE)
+    if ($user && $user->user_type === User::USER_TYPE_WEB_ADMIN) {
+        return response()->json([
+            'news' => $news->load('user')
+        ]);
+    }
+    
+    // If the book is inactive, restrict access for authors and guests
+    if ($news->status !== 'ACTIVE') {
+        return response()->json([
+            'message' => 'News not found or is inactive.',
+        ], 404);
+    }
+    // For authors and viewers (guests), only show ACTIVE books
+    return response()->json([
+    'news' => $news->load('user')
+    ]);
     }
     /**
      * Update the specified resource in storage.

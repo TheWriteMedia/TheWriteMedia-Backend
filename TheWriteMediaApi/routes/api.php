@@ -9,19 +9,33 @@ use Illuminate\Support\Facades\Route;
 
     Route::middleware(['cors'])->group(function () {
 
-        //ENTRY POINT
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login', [AuthController::class, 'login']);
-        //END POINT
-        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+      
 
         //GLOBAL ROUTES (CAN BE USE BY ADMINS AND AUTHORS)
+            //ENTRY POINT
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+            //END POINT
+        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
             //FORGOT PASSWORD
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
             //RESET PASSWORD
         Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+            //PRESENT ALL BOOKS
+        Route::get('/books', action: [BookController::class, 'index']); 
+            //PRESENT SPECIFIC BOOK
+        Route::get('/books/{book}', [BookController::class, 'show']); 
+            //PRESENT ALL NEWS
+        Route::get('/news', action: [NewsController::class, 'index']); 
+            //SHOW SPECIFIC NEWS
+        Route::get('/news/{news}', [NewsController::class, 'show']); 
+
+
+            //GET PROFILE
         Route::middleware(['auth:sanctum'])->get('/user/profile', [AuthController::class, 'getProfile']);
+            //EDIT PROFILE
         Route::middleware(['auth:sanctum'])->put('/user/profile', [AuthController::class, 'updateProfile']);
+
 
         //WEB ADMIN ROUTES
         Route::middleware(['auth:sanctum', 'check.web.admin'])->group(function ()  {
@@ -46,7 +60,6 @@ use Illuminate\Support\Facades\Route;
             Route::patch('admin/news/{news}/restore', [NewsController::class, 'restore']); // Reactivate an news
 
             //VIEW AND RESTORE BOOKS
-            Route::get('/admin/books', action: [BookController::class, 'index']); // show all books
             Route::get('/admin/books/{book}', [BookController::class, 'show']); // Show a specific books
             Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
         });
@@ -57,16 +70,8 @@ use Illuminate\Support\Facades\Route;
             Route::get('/author/dashboard', function () {
                 return response()->json(['message' => 'Welcome Author! Your middleware is working.']);
             });
-
-
-            //VIEW NEWS
-            Route::get('/author/news', action: [NewsController::class, 'index']); // show all news
-            Route::get('/author/news/{news}', [NewsController::class, 'show']); // Show a specific news 
-
             //BOOK MANAGEMENT ROUTES
-            Route::get('/author/books', action: [BookController::class, 'index']); // show all books
             Route::post('/author/books', [BookController::class, 'store']); // Create a new books
-            Route::get('/author/books/{book}', [BookController::class, 'show']); // Show a specific books 
             Route::put('/author/books/{book}', [BookController::class, 'update']); // Update an books 
             Route::delete('/author/books/{book}', [BookController::class, 'destroy']); // Delete an books 
         });

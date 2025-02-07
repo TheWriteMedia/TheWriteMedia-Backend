@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\User;
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
@@ -17,7 +18,7 @@ class BookController extends Controller
     $user = $request->user();
 
     // Check the user type
-    if ($user->user_type === 'web_admin') {
+    if ($user->user_type === User::USER_TYPE_WEB_ADMIN) {
         // If the user is a web_admin, show all books (active and inactive)
         $books = Book::with('user')->latest()->get();
     } else {
@@ -68,20 +69,26 @@ class BookController extends Controller
      */
     public function show(Request $request, Book $book)
     {
-        // Get the currently authenticated user
-        $user = $request->user();
+    // Get the currently authenticated user
+    $user = $request->user();
     
-        // If the user is an author and the book is inactive, deny access
-        if ($user->user_type === 'author' && $book->status !== 'ACTIVE') {
-            return response()->json([
-                'message' => 'Book not found or is inactive.',
-            ], 404);
-        }
-    
-        // Return the book with its related user data
+    // If the user is a web_admin, allow access to all books (ACTIVE & INACTIVE)
+    if ($user && $user->user_type === User::USER_TYPE_WEB_ADMIN) {
         return response()->json([
             'book' => $book->load('user')
         ]);
+    }
+    
+    // If the book is inactive, restrict access for authors and guests
+    if ($book->status !== 'ACTIVE') {
+        return response()->json([
+            'message' => 'Book not found or is inactive.',
+        ], 404);
+    }
+    // For authors and viewers (guests), only show ACTIVE books
+    return response()->json([
+    'book' => $book->load('user')
+    ]);
     }
     /**
      * Update the specified resource in storage.
