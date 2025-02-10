@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\PasswordResetMail;
+use App\Models\Book;
 use App\Models\PasswordReset;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -24,10 +25,10 @@ class AuthController extends Controller
 
     
         // Update the author's data if the user is an author
-if ($user->user_type === 'author') {
-        // Load the associated author data (if any)
-        $user->load('author');
-}
+    if ($user->user_type === 'author') {
+            // Load the associated author data (if any)
+            $user->load('author');
+    }
 
         // Return the user and author data
         return response()->json([
@@ -95,52 +96,78 @@ if ($user->user_type === 'author') {
                 'author_sex' => $validated['author_sex'],
             ]);
         }
+
+         // Update all books associated with the author
+        Book::where('user_id', $user->id)->update(['author_name' => $validated['user_name']]);
     
         return response()->json([
             'message' => 'Profile updated successfully.',
             'user' => $user, // The user includes the author data
         ]);
     }
-    public function register(Request $request){
-
-        $fields = $request->validate([
-            'user_name' => 'required|max:255',
-            'user_email' => 'required|email|unique:users',
-            'user_password' => 'required|confirmed',
-            'user_type' => 'required|max:255'
-        ]);
-
-        $user = User::create($fields);
-        $token = $user->createToken($request->user_name . ' Auth-Token')->plainTextToken;
-        return [
-            'user' => $user,
-            'token' => $token
-        ];
+    public function register(Request $request)
+    {
+        try {
+            // Validate request
+            $validatedData = $request->validate([
+                'user_name' => 'required|string|max:255',
+                'user_email' => 'required|email|unique:users,user_email',
+                'user_password' => 'required|string|confirmed|min:8',
+                'user_type' => 'required|string|in:web_admin,author',
+            ]);
+    
+            // Create user with hashed password
+            $user = User::create([
+                'user_name' => $validatedData['user_name'],
+                'user_email' => $validatedData['user_email'],
+                'user_password' => bcrypt($validatedData['user_password']), // Manually hash password
+                'user_type' => $validatedData['user_type'],
+                'status' => User::STATUS_ACTIVE, // Default status
+            ]);
+    
+            // Generate API token
+            $token = $user->createToken($user->user_name . ' AuthToken')->plainTextToken;
+    
+            return response()->json([
+                'message' => 'User registered successfully',
+                'user' => $user,
+                'token' => $token
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while registering the user',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-    public function login(Request $request){
-       
+    public function login(Request $request)
+    {
         $request->validate([
-            'user_email' => 'required|email|exists:users',
+            'user_email' => 'required|email',
             'user_password' => 'required'
         ]);
-
+    
         $user = User::where('user_email', $request->user_email)->first();
-
-        if(!$user ||!Hash::check($request->user_password, $user->user_password)){
-            return[
+    
+        if (!$user || !Hash::check($request->user_password, $user->user_password)) {
+            return response()->json([
                 'errors' => [
                     'user_email' => ['The provided credentials are incorrect.']
                 ]
-               
-            ];
+            ], 401); // Return HTTP 401 Unauthorized
         }
-       
+    
         $token = $user->createToken($user->user_name . ' Auth-Token')->plainTextToken;
-        return [
+    
+        return response()->json([
             'user' => $user,
             'token' => $token
-        ];
-
+        ]);
     }
     public function logout(Request $request){
        $request->user()->tokens()->delete();

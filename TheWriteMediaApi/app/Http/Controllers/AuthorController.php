@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Author;
+use App\Models\Book;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+
 
 class AuthorController extends Controller
 {
@@ -35,6 +37,7 @@ class AuthorController extends Controller
         'author_sex' => 'required|string|max:255',
         'user_email' => 'required|email|unique:users,email',
         'user_password' => 'required|confirmed|min:8',
+        'profile_picture' => 'required|string' // Validate image
     ]);
 
       // Create the user for the Author
@@ -52,7 +55,8 @@ class AuthorController extends Controller
             'author_name' => $request->author_name . ' Author',
             'author_country' => $request->author_country,
             'author_age' => $request->author_age,
-            'author_sex' => $request->author_sex
+            'author_sex' => $request->author_sex,
+            'profile_picture' => $request->profile_picture, // Save profile picture URL
         ]);
 
         return response()->json([
@@ -92,8 +96,9 @@ class AuthorController extends Controller
         'author_sex' => 'required|string|max:255',
         'user_email' => 'required|email|unique:users,email,' . $user->id,
         'user_password' => 'nullable|confirmed|min:8',
+       'profile_picture' => 'nullable|string',
     ]);
-
+   
     // Update user details
     $user->update([
         'user_name' => $request->author_name ? $request->author_name . ' Author' : $user->user_name,
@@ -101,13 +106,21 @@ class AuthorController extends Controller
         'user_password' => $request->user_password ? Hash::make($request->user_password) : $user->user_password,
     ]);
 
+
     // Update author details
     $author->update([
         'author_name' => $request->author_name ? $request->author_name . ' Author' : $author->author_name,
         'author_country' => $request->author_country ?? $author->author_country,
         'author_age' => $request->author_age ?? $author->author_age,
         'author_sex' => $request->author_sex ?? $author->author_sex,
+        'profile_picture' => $request->profile_picture ?? $author->profile_picture,
     ]);
+
+
+    // If the updated user is an author, update the author_name in all associated books
+    if ($user->user_type === 'author') {
+        Book::where('user_id', $user->id)->update(['author_name' => $user->user_name]);
+    }
 
     return response()->json([
         'message' => 'Author updated successfully.',

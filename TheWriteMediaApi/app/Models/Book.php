@@ -26,6 +26,8 @@ class Book extends Model
        'status'
    ];
 
+   
+  
    protected static function boot()
    {
        parent::boot();
