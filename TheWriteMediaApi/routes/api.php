@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
     Route::middleware(['cors'])->group(function () {
-
-      
-
         //GLOBAL ROUTES (CAN BE USE BY ADMINS AND AUTHORS)
             //ENTRY POINT
         Route::post('/register', [AuthController::class, 'register']);
@@ -63,8 +60,6 @@ use Illuminate\Support\Facades\Route;
             Route::get('/admin/books/{book}', [BookController::class, 'show']); // Show a specific books
             Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
         });
-    
-        
         //AUTHOR ROUTES
         Route::middleware(['auth:sanctum', 'check.author'])->group(function ()  {
             Route::get('/author/dashboard', function () {
