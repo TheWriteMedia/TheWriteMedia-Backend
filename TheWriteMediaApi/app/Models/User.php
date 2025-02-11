@@ -28,6 +28,7 @@ class User extends Model
         'user_email',
         'user_password',
         'user_type',
+        'user_profile',
         'status'
     ];
 

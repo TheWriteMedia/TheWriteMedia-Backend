@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('author_country');
             $table->string('author_age');
             $table->string('author_sex');
-            $table->string('profile_picture');
             $table->timestamps();
         });
     }

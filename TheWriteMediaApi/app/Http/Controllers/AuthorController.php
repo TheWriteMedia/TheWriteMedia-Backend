@@ -24,46 +24,59 @@ class AuthorController extends Controller
          ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-      // Validate the incoming request
+  /**
+ * Store a newly created resource in storage.
+ */
+public function store(Request $request)
+{
+    try {
+        // Validate the incoming request
         $fields = $request->validate([
-        'author_name' => 'required|string|max:255',
-        'author_country' => 'required|string|max:255',
-        'author_age' => 'required|string|max:255',
-        'author_sex' => 'required|string|max:255',
-        'user_email' => 'required|email|unique:users,email',
-        'user_password' => 'required|confirmed|min:8',
-        'profile_picture' => 'required|string' // Validate image
-    ]);
+            'author_name' => 'required|string|max:255',
+            'author_country' => 'required|string|max:255',
+            'author_age' => 'required|string|max:255',
+            'author_sex' => 'required|string|max:255',
+            'user_email' => 'required|email|unique:users,user_email',
+            'user_password' => 'required|confirmed|min:8',
+            'user_profile' => 'required|string' // Validate image
+        ]);
 
-      // Create the user for the Author
-      $user = User::create(attributes: [
-        'user_name' => $request->author_name . ' Author',
-        'user_email' => $request->user_email,
-        'user_password' => Hash::make($request->user_password),
-        'user_type' => User::USER_TYPE_AUTHOR,
-        'status' => 'ACTIVE',  // Set status to ACTIVE by default
-    ]);
+        // Create the user for the Author
+        $user = User::create([
+            'user_name' => $fields['author_name'] . ' Author',
+            'user_email' => $fields['user_email'],
+            'user_password' => Hash::make($fields['user_password']),
+            'user_profile' => $fields['user_profile'],
+            'user_type' => User::USER_TYPE_AUTHOR,
+            'status' => 'ACTIVE', // Default status
+        ]);
 
         // Create the Author record
         $author = Author::create([
             'user_id' => $user->id,
-            'author_name' => $request->author_name . ' Author',
-            'author_country' => $request->author_country,
-            'author_age' => $request->author_age,
-            'author_sex' => $request->author_sex,
-            'profile_picture' => $request->profile_picture, // Save profile picture URL
+            'author_name' => $fields['author_name'] . ' Author',
+            'author_country' => $fields['author_country'],
+            'author_age' => $fields['author_age'],
+            'author_sex' => $fields['author_sex'],
         ]);
 
         return response()->json([
             'message' => 'Author created successfully.',
             'author' => $author
         ], 201);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'An error occurred while creating the author',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 
     /**
      * Display the specified resource.
@@ -80,53 +93,65 @@ class AuthorController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Author $author)
-{
-    // Retrieve the user using the user_id from the Author table
-    $user = User::find($author->user_id); // Get the user by the user_id referenced in Author
-
-    if (!$user) {
-        return response()->json(['message' => 'User not found.'], 404);
+    {
+        try {
+            // Retrieve the user using the user_id from the Author table
+            $user = User::find($author->user_id);
+    
+            if (!$user) {
+                return response()->json(['message' => 'User not found.'], 404);
+            }
+    
+            // Validate the incoming request
+            $fields = $request->validate([
+                'author_name' => 'required|string|max:255',
+                'author_country' => 'required|string|max:255',
+                'author_age' => 'required|string|max:255',
+                'author_sex' => 'required|string|max:255',
+                'user_email' => 'required|email|unique:users,user_email,' . $user->id,
+                'user_password' => 'nullable|confirmed|min:8',
+                'user_profile' => 'nullable|string',
+            ]);
+    
+            // Update user details
+            $user->update([
+                'user_name' => $fields['author_name'] . ' Author',
+                'user_email' => $fields['user_email'],
+                'user_password' => isset($fields['user_password']) ? Hash::make($fields['user_password']) : $user->user_password,
+                'user_profile' => $fields['user_profile'] ?? $user->user_profile,
+            ]);
+    
+            // Update author details
+            $author->update([
+                'author_name' => $fields['author_name'] . ' Author',
+                'author_country' => $fields['author_country'],
+                'author_age' => $fields['author_age'],
+                'author_sex' => $fields['author_sex'],
+            ]);
+    
+            // If the updated user is an author, update the author_name in all associated books
+            if ($user->user_type === 'author') {
+                Book::where('user_id', $user->id)->update(['author_name' => $user->user_name]);
+            }
+    
+            return response()->json([
+                'message' => 'Author updated successfully.',
+                'author' => $author->load('user'),
+            ], 200);
+    
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the author',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-
-    // Validate the incoming request
-    $fields = $request->validate([
-        'author_name' => 'required|string|max:255',
-        'author_country' => 'required|string|max:255',
-        'author_age' => 'required|string|max:255',
-        'author_sex' => 'required|string|max:255',
-        'user_email' => 'required|email|unique:users,email,' . $user->id,
-        'user_password' => 'nullable|confirmed|min:8',
-       'profile_picture' => 'nullable|string',
-    ]);
-   
-    // Update user details
-    $user->update([
-        'user_name' => $request->author_name ? $request->author_name . ' Author' : $user->user_name,
-        'user_email' => $request->user_email ?? $user->user_email,
-        'user_password' => $request->user_password ? Hash::make($request->user_password) : $user->user_password,
-    ]);
-
-
-    // Update author details
-    $author->update([
-        'author_name' => $request->author_name ? $request->author_name . ' Author' : $author->author_name,
-        'author_country' => $request->author_country ?? $author->author_country,
-        'author_age' => $request->author_age ?? $author->author_age,
-        'author_sex' => $request->author_sex ?? $author->author_sex,
-        'profile_picture' => $request->profile_picture ?? $author->profile_picture,
-    ]);
-
-
-    // If the updated user is an author, update the author_name in all associated books
-    if ($user->user_type === 'author') {
-        Book::where('user_id', $user->id)->update(['author_name' => $user->user_name]);
-    }
-
-    return response()->json([
-        'message' => 'Author updated successfully.',
-        'author' => $author->load('user'),
-    ]);
-}
+    
     /**
      * Remove the specified resource from storage.
      */
