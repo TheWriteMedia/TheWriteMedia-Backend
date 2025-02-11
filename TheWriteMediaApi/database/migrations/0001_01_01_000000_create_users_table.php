@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('user_email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('user_password');
+            $table->string('user_profile');
             $table->enum('user_type', ['web_admin', 'author']); // Defines user roles
             $table->enum('status', ['active', 'inactive'])->default('active'); // Optional status field
             $table->rememberToken();

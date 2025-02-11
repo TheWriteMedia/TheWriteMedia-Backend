@@ -114,6 +114,7 @@ class AuthController extends Controller
                 'user_email' => 'required|email|unique:users,user_email',
                 'user_password' => 'required|string|confirmed|min:8',
                 'user_type' => 'required|string|in:web_admin,author',
+                'user_profile' => 'required|string'
             ]);
     
             // Create user with hashed password
@@ -122,6 +123,7 @@ class AuthController extends Controller
                 'user_email' => $validatedData['user_email'],
                 'user_password' => bcrypt($validatedData['user_password']), // Manually hash password
                 'user_type' => $validatedData['user_type'],
+                'user_profile' => $validatedData['user_profile'],
                 'status' => User::STATUS_ACTIVE, // Default status
             ]);
     
