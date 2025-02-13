@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\NewsController;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,12 +36,16 @@ use Illuminate\Support\Facades\Route;
         Route::middleware(['auth:sanctum'])->put('/user/profile', [AuthController::class, 'updateProfile']);
 
 
+        Route::post('/delete-image', [AuthorController::class, 'deleteImage']); // when replacing a new image for the author
+
         //WEB ADMIN ROUTES
         Route::middleware(['auth:sanctum', 'check.web.admin'])->group(function ()  {
             Route::get('/admin/dashboard', function () {
                 return response()->json(['message' => 'Welcome Admin! Your middleware is working.']);
             });
 
+
+          
              //AUTHOR MANAGEMENT ROUTES
             Route::get('/admin/authors', action: [AuthorController::class, 'index']); // show all authors
             Route::post('/admin/authors', [AuthorController::class, 'store']); // Create a new author
