@@ -7,7 +7,8 @@ use App\Models\Book;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AuthorController extends Controller
 {
@@ -43,7 +44,7 @@ public function store(Request $request)
 
         // Create the user for the Author
         $user = User::create([
-            'user_name' => $fields['author_name'] . ' Author',
+            'user_name' => $fields['author_name'],
             'user_email' => $fields['user_email'],
             'user_password' => Hash::make($fields['user_password']),
             'user_profile' => $fields['user_profile'],
@@ -115,7 +116,7 @@ public function store(Request $request)
     
             // Update user details
             $user->update([
-                'user_name' => $fields['author_name'] . ' Author',
+                'user_name' => $fields['author_name'] ,
                 'user_email' => $fields['user_email'],
                 'user_password' => isset($fields['user_password']) ? Hash::make($fields['user_password']) : $user->user_password,
                 'user_profile' => $fields['user_profile'] ?? $user->user_profile,
@@ -123,7 +124,7 @@ public function store(Request $request)
     
             // Update author details
             $author->update([
-                'author_name' => $fields['author_name'] . ' Author',
+                'author_name' => $fields['author_name'],
                 'author_country' => $fields['author_country'],
                 'author_age' => $fields['author_age'],
                 'author_sex' => $fields['author_sex'],
@@ -183,4 +184,35 @@ public function store(Request $request)
 
         return response()->json(['message' => 'Author has been reactivated.'], 200);
     }
+
+    public function deleteImage(Request $request) {
+        $publicId = $request->input('publicId');
+    
+        if (!$publicId) {
+            return response()->json(['error' => 'Public ID is required'], 400);
+        }
+    
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = env('CLOUDINARY_API_KEY');
+        $apiSecret = env('CLOUDINARY_API_SECRET');
+    
+        $timestamp = time();
+        $signature = sha1("public_id={$publicId}&timestamp={$timestamp}{$apiSecret}");
+    
+        $response = Http::asForm()->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/destroy", [
+            'public_id' => $publicId,
+            'api_key' => $apiKey,
+            'timestamp' => $timestamp,
+            'signature' => $signature,
+        ]);
+    
+        if ($response->successful()) {
+            return response()->json(['message' => 'Image deleted successfully']);
+        } else {
+            Log::error('Failed to delete Cloudinary image', ['response' => $response->body()]);
+            return response()->json(['error' => 'Failed to delete image'], 500);
+        }
+    }
+
+    
 }

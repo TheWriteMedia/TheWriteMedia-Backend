@@ -38,73 +38,91 @@ class AuthController extends Controller
     // Method to update the user's profile and password
     public function updateProfile(Request $request)
     {
-        $user = $request->user();
+        try {
+            $user = $request->user();
     
-        // Ensure that the user cannot directly update the password via the 'user_password' field
-        if ($request->has('user_password') && !$request->filled('current_password')) {
-            return response()->json(['message' => 'Password change is only allowed through the current password, new password, and confirm password fields.'], 400);
-        }
-    
-        // Define validation rules based on user role
-        if ($user->user_type === 'web_admin') {
-            // Validation rules for admin
-            $validated = $request->validate([
-                'user_name' => 'required|string|max:255',
-                'user_email' => 'required|string|email|max:255|unique:users,user_email,' . $user->id,
-                'current_password' => 'nullable|string',
-                'new_password' => ['nullable', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
-            ]);
-        } elseif ($user->user_type === 'author') {
-            // Validation rules for author
-            $validated = $request->validate([
-                'user_name' => 'required|string|max:255',
-                'user_email' => 'required|string|email|max:255|unique:users,user_email,' . $user->id,
-                'author_country' => 'required|string|max:255',
-                'author_age' => 'required|integer',
-                'author_sex' => 'required|string|max:10',
-                'current_password' => 'nullable|string',
-                'new_password' => ['nullable', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
-            ]);
-        }
-    
-        // If the user is changing the password, validate the current password
-        if ($request->filled('current_password')) {
-            if (!Hash::check($validated['current_password'], $user->user_password)) {
-                return response()->json(['message' => 'Current password is incorrect.'], 400);
+            // Ensure that password updates require the current password
+            if ($request->has('user_password') && !$request->filled('current_password')) {
+                return response()->json([
+                    'message' => 'Password change is only allowed through the current password, new password, and confirm password fields.'
+                ], 400);
             }
     
-            // Update the password if provided and valid
+            // Define validation rules based on user role
+            $validationRules = [
+                'user_name' => 'required|string|max:255',
+                'user_email' => 'required|string|email|max:255|unique:users,user_email,' . $user->id,
+                'current_password' => 'nullable|string',
+                'new_password' => ['nullable', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
+                'user_profile' => 'required|string'
+            ];
+    
+            if ($user->user_type === 'author') {
+                // Additional validation for authors
+                $validationRules = array_merge($validationRules, [
+                    'author_country' => 'required|string|max:255',
+                    'author_age' => 'required|integer',
+                    'author_sex' => 'required|string|max:10',
+                ]);
+            }
+    
+            // Validate request
+            $validated = $request->validate($validationRules);
+    
+            // If the user is changing the password, validate the current password
+            if ($request->filled('current_password')) {
+                if (!Hash::check($validated['current_password'], $user->user_password)) {
+                    return response()->json([
+                        'message' => 'Current password is incorrect.'
+                    ], 400);
+                }
+    
+                // Update the password if provided and valid
+                $user->update([
+                    'user_password' => Hash::make($validated['new_password']),
+                ]);
+            }
+    
+            // Update the user data (name, email, profile)
             $user->update([
-                'user_password' => Hash::make($validated['new_password']),
+                'user_name' => $validated['user_name'],
+                'user_email' => $validated['user_email'],
+                'user_profile' => $validated['user_profile']
             ]);
+    
+            // If the user is an author, update author details
+            if ($user->user_type === 'author') {
+                $user->load('author');
+                if ($user->author) {
+                    $user->author()->update([
+                        'author_name' => $validated['user_name'],
+                        'author_country' => $validated['author_country'],
+                        'author_age' => $validated['author_age'],
+                        'author_sex' => $validated['author_sex'],
+                    ]);
+                }
+            }
+    
+            // Update all books associated with the author
+            Book::where('user_id', $user->id)->update(['author_name' => $validated['user_name']]);
+    
+            return response()->json([
+                'message' => 'Profile updated successfully.',
+                'user' => $user,
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the profile',
+                'error' => $e->getMessage()
+            ], 500);
         }
-    
-        // Update the user data (name, email)
-        $user->update([
-            'user_name' => $validated['user_name'],
-            'user_email' => $validated['user_email'],
-        ]);
-    
-        // Update the author's data if the user is an author
-        if ($user->user_type === 'author') {
-            // Retrieve the updated user with author data (if available)
-            $user->load('author');
-            $user->author()->update([
-                'author_name' => $validated['user_name'],
-                'author_country' => $validated['author_country'],
-                'author_age' => $validated['author_age'],
-                'author_sex' => $validated['author_sex'],
-            ]);
-        }
-
-         // Update all books associated with the author
-        Book::where('user_id', $user->id)->update(['author_name' => $validated['user_name']]);
-    
-        return response()->json([
-            'message' => 'Profile updated successfully.',
-            'user' => $user, // The user includes the author data
-        ]);
     }
+    
     public function register(Request $request)
     {
         try {
