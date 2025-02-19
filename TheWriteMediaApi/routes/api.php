@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\Route;
         Route::middleware(['auth:sanctum'])->put('/user/profile', [AuthController::class, 'updateProfile']);
 
 
-        Route::post('/delete-image', [AuthorController::class, 'deleteImage']); // when replacing a new image for the author
+        Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
 
         //WEB ADMIN ROUTES
         Route::middleware(['auth:sanctum', 'check.web.admin'])->group(function ()  {

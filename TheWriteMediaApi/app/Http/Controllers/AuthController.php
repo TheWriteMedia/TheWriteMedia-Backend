@@ -10,6 +10,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -252,4 +254,34 @@ class AuthController extends Controller
         return response()->json(['message' => 'Password has been successfully reset.'], 200);
     }
     
+
+    public function deleteImage(Request $request) {
+        $publicId = $request->input('publicId');
+    
+        if (!$publicId) {
+            return response()->json(['error' => 'Public ID is required'], 400);
+        }
+    
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = env('CLOUDINARY_API_KEY');
+        $apiSecret = env('CLOUDINARY_API_SECRET');
+    
+        $timestamp = time();
+        $signature = sha1("public_id={$publicId}&timestamp={$timestamp}{$apiSecret}");
+    
+        $response = Http::asForm()->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/destroy", [
+            'public_id' => $publicId,
+            'api_key' => $apiKey,
+            'timestamp' => $timestamp,
+            'signature' => $signature,
+        ]);
+    
+        if ($response->successful()) {
+            return response()->json(['message' => 'Image deleted successfully']);
+        } else {
+            Log::error('Failed to delete Cloudinary image', ['response' => $response->body()]);
+            return response()->json(['error' => 'Failed to delete image'], 500);
+        }
+    }
+
 }
