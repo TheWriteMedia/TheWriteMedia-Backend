@@ -38,6 +38,8 @@ class NewsController extends Controller
         $fields = $request->validate([
             'news_title' => 'required|string|max:255',
             'news_description' => 'required|string|max:255',
+            'conclusion' => 'required|string|max:255',
+            'template_no' => 'required|string|max:255',
             'news_plugs' => 'required|array',  // Validate as an array
             'news_plugs.*' => 'string',         // Ensure each item in the array is a string
             'img_urls' => 'required|array',    // Validate as an array
@@ -50,6 +52,8 @@ class NewsController extends Controller
         $news = News::create([
             'user_id' => $user->id,
             'news_title' => $request->news_title,
+            'template_no' => $request->template_no,
+            'conclusion' => $request->conclusion,
             'news_description' => $request->news_description,
             'news_plugs' => $request->news_plugs, // Store the array of strings as a JSON
             'img_urls' => $request->img_urls,     // Store the array of strings as a JSON
@@ -95,6 +99,7 @@ class NewsController extends Controller
     $fields = $request->validate([
         'news_title' => 'required|string|max:255',
         'news_description' => 'required|string|max:255',
+        'conclusion' => 'required|string|max:255',
         'news_plugs' => 'required|array',  // Validate as an array
         'news_plugs.*' => 'string',          // Ensure each item in the array is a string
         'img_urls' => 'required|array',    // Validate as an array

@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users'); // User relation (foreign key reference)
             $table->string('news_title');
+            $table->string(column: 'conclusion');
+            $table->string('template_no');
             $table->text('news_description');
             $table->json('news_plugs'); // Store multiple strings as JSON
             $table->json('img_urls');   // Store multiple strings as JSON
