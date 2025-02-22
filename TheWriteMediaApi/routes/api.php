@@ -72,6 +72,7 @@ use Illuminate\Support\Facades\Route;
                 return response()->json(['message' => 'Welcome Author! Your middleware is working.']);
             });
             //BOOK MANAGEMENT ROUTES
+            Route::get('/author/books', action: [BookController::class, 'index']); 
             Route::post('/author/books', [BookController::class, 'store']); // Create a new books
             Route::put('/author/books/{book}', [BookController::class, 'update']); // Update an books 
             Route::delete('/author/books/{book}', [BookController::class, 'destroy']); // Delete an books 

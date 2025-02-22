@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('news', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users'); // User relation (foreign key reference)
-            $table->string('news_title');
+            $table->string(column: 'news_title');
             $table->string(column: 'conclusion');
             $table->string('template_no');
+            $table->string('type');
             $table->text('news_description');
             $table->json('news_plugs'); // Store multiple strings as JSON
             $table->json('img_urls');   // Store multiple strings as JSON
