@@ -40,6 +40,7 @@ class NewsController extends Controller
             'news_description' => 'required|string|max:255',
             'conclusion' => 'required|string|max:255',
             'template_no' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
             'news_plugs' => 'required|array',  // Validate as an array
             'news_plugs.*' => 'string',         // Ensure each item in the array is a string
             'img_urls' => 'required|array',    // Validate as an array
@@ -53,6 +54,7 @@ class NewsController extends Controller
             'user_id' => $user->id,
             'news_title' => $request->news_title,
             'template_no' => $request->template_no,
+            'type' => $request->type,
             'conclusion' => $request->conclusion,
             'news_description' => $request->news_description,
             'news_plugs' => $request->news_plugs, // Store the array of strings as a JSON
@@ -100,6 +102,7 @@ class NewsController extends Controller
         'news_title' => 'required|string|max:255',
         'news_description' => 'required|string|max:255',
         'conclusion' => 'required|string|max:255',
+        
         'news_plugs' => 'required|array',  // Validate as an array
         'news_plugs.*' => 'string',          // Ensure each item in the array is a string
         'img_urls' => 'required|array',    // Validate as an array

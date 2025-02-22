@@ -19,6 +19,7 @@ class News extends Model
        'news_description',
        'conclusion',
        'template_no',
+       'type',
        'news_plugs',
        'img_urls',
        'status'
