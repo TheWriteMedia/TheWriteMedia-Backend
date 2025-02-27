@@ -16,17 +16,47 @@ class Book extends Model
 
    protected $fillable = [
        'user_id',
-       'author_name',
+       'author_id',
        'book_title',
-       'ebook_price',
+      
+       'paperback_price_increase',
+       'paperback_srp',
        'paperback_price',
        'paperback_isbn',
+       
+       'hardback_price_increase',
+       'hardback_srp',
+       'hardback_price',
+       'hardback_isbn',
+
+       'ebook_price_increase',
+       'ebook_srp',
+       'ebook_price',
        'ebook_isbn',
+
+       'description',
+       'additional_info',
        'img_urls',
        'status'
    ];
 
    
+
+   protected $casts = [
+    'paperback_price_increase' => 'double',
+    'paperback_srp' => 'double',
+    'paperback_price' => 'double',
+    
+    'hardback_price_increase' => 'double',
+    'hardback_srp' => 'double',
+    'hardback_price' => 'double',
+
+    'ebook_price_increase' => 'double',
+    'ebook_srp' => 'double',
+    'ebook_price' => 'double',
+];
+
+
   
    protected static function boot()
    {
@@ -44,4 +74,10 @@ class Book extends Model
    {
        return $this->belongsTo(User::class);
    }
+
+   public function author()
+{
+    return $this->belongsTo(Author::class, 'author_id', '_id');
+}
+
 }

@@ -37,15 +37,13 @@ use Illuminate\Support\Facades\Route;
 
 
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
-
+        Route::middleware(['auth:sanctum'])->get('/books', action: [BookController::class, 'index']); 
         //WEB ADMIN ROUTES
         Route::middleware(['auth:sanctum', 'check.web.admin'])->group(function ()  {
             Route::get('/admin/dashboard', function () {
                 return response()->json(['message' => 'Welcome Admin! Your middleware is working.']);
             });
 
-
-          
              //AUTHOR MANAGEMENT ROUTES
             Route::get('/admin/authors', action: [AuthorController::class, 'index']); // show all authors
             Route::post('/admin/authors', [AuthorController::class, 'store']); // Create a new author
@@ -63,7 +61,11 @@ use Illuminate\Support\Facades\Route;
             Route::patch('admin/news/{news}/restore', [NewsController::class, 'restore']); // Reactivate an news
 
             //VIEW AND RESTORE BOOKS
-            Route::get('/admin/books/{book}', [BookController::class, 'show']); // Show a specific books
+           //BOOK MANAGEMENT ROUTES
+          
+           Route::post('/admin/books', [BookController::class, 'store']); // Create a new books
+           Route::put('/admin/books/{book}', [BookController::class, 'update']); // Update an books 
+           Route::delete('/admin/books/{book}', [BookController::class, 'destroy']); // Delete an books 
             Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
         });
         //AUTHOR ROUTES
@@ -71,11 +73,7 @@ use Illuminate\Support\Facades\Route;
             Route::get('/author/dashboard', function () {
                 return response()->json(['message' => 'Welcome Author! Your middleware is working.']);
             });
-            //BOOK MANAGEMENT ROUTES
-            Route::get('/author/books', action: [BookController::class, 'index']); 
-            Route::post('/author/books', [BookController::class, 'store']); // Create a new books
-            Route::put('/author/books/{book}', [BookController::class, 'update']); // Update an books 
-            Route::delete('/author/books/{book}', [BookController::class, 'destroy']); // Delete an books 
+          
         });
 
     });

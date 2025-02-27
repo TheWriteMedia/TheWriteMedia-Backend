@@ -16,10 +16,28 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users'); // User relation (foreign key reference)
             $table->string('author_name');
             $table->string('book_title');
-            $table->string('ebook_price');
-            $table->string('paperback_price');
-            $table->string('paperback_isbn');
-            $table->string('ebook_isbn');
+          
+           // Paperback Fields
+           $table->decimal('paperback_price_increase', 10, 2)->nullable();
+           $table->decimal('paperback_srp', 10, 2)->nullable();
+           $table->decimal('paperback_price', 10, 2)->nullable();
+           $table->string('paperback_isbn', 255)->nullable();
+
+           // Hardback Fields
+           $table->decimal('hardback_price_increase', 10, 2)->nullable();
+           $table->decimal('hardback_srp', 10, 2)->nullable();
+           $table->decimal('hardback_price', 10, 2)->nullable();
+           $table->string('hardback_isbn', 255)->nullable();
+
+           // Ebook Fields
+           $table->decimal('ebook_price_increase', 10, 2)->nullable();
+           $table->decimal('ebook_srp', 10, 2)->nullable();
+           $table->decimal('ebook_price', 10, 2)->nullable();
+           $table->string('ebook_isbn', 255)->nullable();
+
+
+            $table->string('description');
+            $table->string('additional_info');
             $table->json('img_urls'); 
             $table->enum('status', ['active', 'inactive'])->default('active'); 
             $table->timestamps();
