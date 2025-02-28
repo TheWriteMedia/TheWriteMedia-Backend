@@ -74,8 +74,8 @@ class User extends Model
            });
        }
        public function author()
-    {
-      // Specify the foreign key explicitly if it’s not the default
-    return $this->hasOne(Author::class, 'user_id', '_id');
-    }
+       {
+           return $this->hasOne(Author::class, 'user_id', '_id');
+       }
+       
 }

@@ -15,7 +15,7 @@ class Book extends Model
     protected $collection = 'books'; 
 
    protected $fillable = [
-       'user_id',
+     
        'author_id',
        'book_title',
       
@@ -74,10 +74,21 @@ class Book extends Model
    {
        return $this->belongsTo(User::class);
    }
+     /**
+     * A book belongs to an author.
+     */
 
    public function author()
-{
-    return $this->belongsTo(Author::class, 'author_id', '_id');
-}
+    {
+        return $this->belongsTo(Author::class, 'author_id', 'user_id');
+    }
+
+     /**
+     * A book has many sales reports.
+     */
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'book_id', '_id');
+    }
 
 }
