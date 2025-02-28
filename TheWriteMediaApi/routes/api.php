@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
@@ -20,8 +21,9 @@ use Illuminate\Support\Facades\Route;
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
             //RESET PASSWORD
         Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-            //PRESENT ALL BOOKS
-        Route::get('/books', action: [BookController::class, 'index']); 
+        //PRESENT ALL BOOKS
+        Route::get('/books', [BookController::class, 'index']);
+
             //PRESENT SPECIFIC BOOK
         Route::get('/books/{book}', [BookController::class, 'show']); 
             //PRESENT ALL NEWS
@@ -37,7 +39,7 @@ use Illuminate\Support\Facades\Route;
 
 
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
-        Route::middleware(['auth:sanctum'])->get('/books', action: [BookController::class, 'index']); 
+ 
         //WEB ADMIN ROUTES
         Route::middleware(['auth:sanctum', 'check.web.admin'])->group(function ()  {
             Route::get('/admin/dashboard', function () {
@@ -60,13 +62,17 @@ use Illuminate\Support\Facades\Route;
             Route::delete('/admin/news/{news}', [NewsController::class, 'destroy']); // Delete an news 
             Route::patch('admin/news/{news}/restore', [NewsController::class, 'restore']); // Reactivate an news
 
-            //VIEW AND RESTORE BOOKS
+           //REPORT MANAGEMENT ROUTES
+           Route::get('/admin/reports', action: [ReportController::class, 'index']); // show all reports
+           Route::post('/admin/reports', [ReportController::class, 'store']); // Create a new report
+           Route::get('/admin/reports/{id}', action: [ReportController::class, 'show']); // show a specific report
+           Route::put('/admin/reports/{reportId}', [ReportController::class, 'update']); // Create a new report
+
            //BOOK MANAGEMENT ROUTES
-          
            Route::post('/admin/books', [BookController::class, 'store']); // Create a new books
            Route::put('/admin/books/{book}', [BookController::class, 'update']); // Update an books 
            Route::delete('/admin/books/{book}', [BookController::class, 'destroy']); // Delete an books 
-            Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
+           Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
         });
         //AUTHOR ROUTES
         Route::middleware(['auth:sanctum', 'check.author'])->group(function ()  {

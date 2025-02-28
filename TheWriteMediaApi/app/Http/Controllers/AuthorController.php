@@ -84,7 +84,7 @@ public function store(Request $request)
      */
     public function show(Author $author)
     {
-         // Return the Barangay Admin details along with the associated user
+         // Return the author along with the associated user
          return response()->json([
             'author' => $author->load('user')
         ]);

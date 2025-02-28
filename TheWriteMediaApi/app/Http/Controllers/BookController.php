@@ -15,22 +15,21 @@ class BookController extends Controller
      */
     public function index(Request $request)
     {
-        // Get the currently authenticated user
+        // Get the currently authenticated user (if any)
         $user = $request->user();
-
-        // Determine books to retrieve based on user type
-        if ($user->user_type === User::USER_TYPE_WEB_ADMIN) {
-            // Web admin sees all books
-            $books = Book::with(['user', 'author'])->latest()->get();
+    
+        // If the user is an admin, show all books; otherwise, show only active books
+        if ($user && $user->user_type === User::USER_TYPE_WEB_ADMIN) {
+            $books = Book::with('author')->latest()->get();
         } else {
-            // Authors see only active books
-            $books = Book::with(['user', 'author'])->where('status', 'ACTIVE')->latest()->get();
+            $books = Book::with('author')->where('status', 'ACTIVE')->latest()->get();
         }
-
+    
         return response()->json([
             'books' => $books
         ]);
     }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -68,15 +67,10 @@ class BookController extends Controller
         if (!$author) {
             return response()->json(['error' => 'Author not found.'], 404);
         }
-    
-        // Access the currently authenticated user
-        $user = $request->user();
-    
-        // Format prices to two decimal places before saving
-        $book = Book::create([
-            'user_id' => $user->id,
 
-            'author_id' => $author->id,
+        // Format prices to two decimal places before saving
+        $book = Book::create(attributes: [
+            'author_id' => $author->user_id,
             'book_title' => $request->book_title,
           
             'paperback_price_increase' => number_format((float)$request->paperback_price_increase, 2, '.', ''),
@@ -116,7 +110,7 @@ class BookController extends Controller
         // If the user is a web_admin, allow access to all books
         if ($user && $user->user_type === User::USER_TYPE_WEB_ADMIN) {
             return response()->json([
-                'book' => $book->load(['user', 'author'])  // <-- Load both user & author
+                'book' => $book->load('author')  // <-- Load both user & author
             ]);
         }
     
@@ -129,7 +123,7 @@ class BookController extends Controller
     
         // For authors and viewers (guests), only show ACTIVE books
         return response()->json([
-            'book' => $book->load(['user', 'author'])  // <-- Load both user & author
+            'book' => $book->load( 'author')  // <-- Load both user & author
         ]);
     }
     
@@ -174,7 +168,7 @@ class BookController extends Controller
     // Ensure prices are formatted to two decimal places before updating
     $book->update([
 
-        'author_id' => $author->_id, // Update author ID
+        'author_id' => $author->user_id, // Update author ID
         'book_title' => $fields['book_title'],
      
         'paperback_price_increase' => number_format((float)$fields['paperback_price_increase'], 2, '.', ''),
@@ -192,8 +186,6 @@ class BookController extends Controller
         'ebook_price' => number_format((float)$fields['ebook_price'], 2, '.', ''),
         'ebook_isbn' => $fields['ebook_isbn'],
 
-
-       
         'description' => $fields['description'],
         'additional_info' => $fields['additional_info'],
         'img_urls' => $fields['img_urls'],

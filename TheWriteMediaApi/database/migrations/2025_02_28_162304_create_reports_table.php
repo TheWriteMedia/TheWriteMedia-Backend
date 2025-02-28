@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('authors', function (Blueprint $table) {
+        Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('authors'); // User relation (foreign key reference)
-            $table->string('author_name');
-            $table->string('author_country');
-            $table->string('author_age');
-            $table->string('author_sex');
+            $table->foreignId('book_id')->constrained('books'); // User relation (foreign key reference)
+            $table->foreignId('author_id')->constrained('authors'); // User relation (foreign key reference)
+        
+    
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('authors');
+        Schema::dropIfExists('reports');
     }
 };
