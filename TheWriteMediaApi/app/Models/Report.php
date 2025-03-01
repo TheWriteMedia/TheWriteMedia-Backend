@@ -17,12 +17,14 @@ class Report extends Model
         'author_id',
         'sales_data', // Array of objects
         'total_royalty',
+        'quarter', // New field for quarter
+        'year', // Optional: Track year separately
         'status'
     ];
 
     protected $casts = [
         'sales_data' => 'array', // Ensure sales_data is stored as an array
-        'total_royalty' => 'float',
+        'total_royalty' => 'decimal:2',
     ];
 
 
