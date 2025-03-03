@@ -114,7 +114,7 @@ public function store(Request $request)
                 'number_of_book_sold' => $booksSold,
                 'country' => $country,
                 'royalty_per_book' => $royaltyPerBook,
-                'total_royalty' => $totalRoyaltyForSale,
+                'total_royalty' => number_format($totalRoyaltyForSale, 2)
             ];
         }
 
@@ -155,7 +155,7 @@ public function store(Request $request)
     {
         try {
             // Find the report by ID
-            $report = Report::find($id);
+            $report = Report::with(['author', 'book'])->find($id);
     
             if (!$report) {
                 return response()->json([
@@ -166,7 +166,7 @@ public function store(Request $request)
     
             return response()->json([
                 'status' => 'success',
-                'report' => $report,
+                'report' => $report
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

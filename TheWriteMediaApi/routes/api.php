@@ -70,7 +70,8 @@ use Illuminate\Support\Facades\Route;
 
            //BOOK MANAGEMENT ROUTES
            Route::post('/admin/books', [BookController::class, 'store']); // Create a new books
-           Route::put('/admin/books/{book}', [BookController::class, 'update']); // Update an books 
+           Route::put('/admin/books/{book}', [BookController::class, 'update']); // show a specific book 
+           Route::get('/admin/books/{book}', [BookController::class, 'show']); // Update an books 
            Route::delete('/admin/books/{book}', [BookController::class, 'destroy']); // Delete an books 
            Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
         });
