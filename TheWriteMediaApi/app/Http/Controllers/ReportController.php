@@ -25,12 +25,7 @@ class ReportController extends Controller
     } else {
         // Author: Show only reports for the logged-in author and active books
         $reports = Report::with(['book', 'author'])
-            ->where('author_id', $user->user_id)
-            ->whereHas('book', function ($query) {
-                $query->where('status', 'ACTIVE');
-            })
-            ->latest()
-            ->get();
+        ->latest()->get();
     }
 
     return response()->json([
@@ -300,13 +295,15 @@ public function update(Request $request, $id)
 }
 
 
-    
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Report $report)
     {
-        //
+       // Delete the post
+       $report->delete();
+       return response()->json([
+           'message' => 'Report deleted successfully.'
+       ]);
     }
 }
