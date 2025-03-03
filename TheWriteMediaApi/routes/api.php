@@ -38,6 +38,12 @@ use Illuminate\Support\Facades\Route;
         Route::middleware(['auth:sanctum'])->put('/user/profile', [AuthController::class, 'updateProfile']);
 
 
+        //PRESENT ALL REPORTS
+        Route::middleware(['auth:sanctum'])->get('/reports', action: [ReportController::class, 'index']); // show all reports
+        //SHOW SPECIFIC REPORT
+        Route::middleware(['auth:sanctum'])->get('/reports/{id}', action: [ReportController::class, 'show']); // show a specific report
+
+
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
  
         //WEB ADMIN ROUTES
@@ -65,8 +71,8 @@ use Illuminate\Support\Facades\Route;
            //REPORT MANAGEMENT ROUTES
            Route::get('/admin/reports', action: [ReportController::class, 'index']); // show all reports
            Route::post('/admin/reports', [ReportController::class, 'store']); // Create a new report
-           Route::get('/admin/reports/{id}', action: [ReportController::class, 'show']); // show a specific report
            Route::put('/admin/reports/{reportId}', [ReportController::class, 'update']); // Create a new report
+           Route::delete('/admin/reports/{report}', [ReportController::class, 'destroy']); // Delete an news 
 
            //BOOK MANAGEMENT ROUTES
            Route::post('/admin/books', [BookController::class, 'store']); // Create a new books
