@@ -10,12 +10,13 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
+    libzip-dev \
     libssl-dev \
     pkg-config \
     zip \
     unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo mbstring gd
+    && docker-php-ext-install pdo pdo_mysql mbstring gd zip exif pcntl
 
 # Install MongoDB PHP driver
 RUN pecl install mongodb && docker-php-ext-enable mongodb
@@ -26,20 +27,19 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set the working directory
 WORKDIR /var/www/html
 
-# Copy the Laravel project files to the container
-COPY . .
+# Copy only the necessary files for Composer installation
+COPY composer.json composer.lock ./
 
 # Install Laravel dependencies with memory limit
-RUN composer clear-cache && \
-    COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Copy the rest of the application files
+COPY . .
 
 # Set the proper permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Copy .env file to container (optional: if secrets are managed in Render)
-COPY .env .env
-
-# Generate application key if not set in .env
+# Generate application key if not set in .env (Render will provide .env variables)
 RUN php artisan key:generate
 
 # Clear and cache configuration
@@ -67,5 +67,4 @@ RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf
 EXPOSE 10000
 
 # Start Apache on port 10000
-
-CMD ["apache2-foreground", "-D", "FOREGROUND", "-c", "Listen 10000"]
+CMD ["apache2-foreground"]
