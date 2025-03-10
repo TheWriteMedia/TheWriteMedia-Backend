@@ -6,7 +6,7 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\User;
 use Illuminate\Http\Request;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
 
 class BookController extends Controller
 {
