@@ -55,8 +55,8 @@ use Illuminate\Support\Facades\Route;
         Route::middleware(['auth:sanctum'])->get('/reports', action: [ReportController::class, 'index']); // show all reports
 
         //PRESENT ALL REVIEWS
-        Route::middleware(['auth:sanctum'])->get('/reviews', action: [ReviewController::class, 'index']); // show all reviews
-        Route::middleware(['auth:sanctum'])->post('/reviews', action: [ReviewController::class, 'store']); // post a review
+        Route::get('/reviews', action: [ReviewController::class, 'index']); // show all reviews
+        Route::post('/reviews', action: [ReviewController::class, 'store']); // post a review
 
 
 
@@ -105,11 +105,11 @@ use Illuminate\Support\Facades\Route;
            Route::patch('admin/services/{service}/restore', [ServiceController::class, 'restore']); // Reactivate a service
 
 
-        //REVIEW MANAGMENT ROUTES    
-        Route::patch('admin/reviews/{service}/approve', [ReviewController::class, 'approve']); // Reactivate a review
-        Route::patch('admin/reviews/{service}/decline', [ReviewController::class, 'decline']); // Decline a review
-        Route::delete('/admin/reviews/{review}', [ReviewController::class, 'destroy']); // Delete a review 
-    
+            //REVIEW MANAGMENT ROUTES    
+            Route::patch('/admin/reviews/{review}/approve', [ReviewController::class, 'approve']); // Reactivate a review
+            Route::patch('/admin/reviews/{review}/decline', [ReviewController::class, 'decline']); // Decline a review
+            Route::delete('/admin/reviews/{review}', [ReviewController::class, 'destroy']); // Delete a review 
+        
 
         });
         //AUTHOR ROUTES

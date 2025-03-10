@@ -91,4 +91,9 @@ class Book extends Model
         return $this->hasMany(Report::class, 'book_id', '_id');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'book_id', '_id');
+    }
+
 }
