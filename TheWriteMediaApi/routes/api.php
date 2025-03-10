@@ -5,8 +5,9 @@ use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ReportController;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ServiceController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,14 @@ use Illuminate\Support\Facades\Route;
             //SHOW SPECIFIC NEWS
         Route::get('/news/{news}', [NewsController::class, 'show']); 
 
+            //PRESENT ALL SERVICES
+            Route::get('/services', action: [ServiceController::class, 'index']); 
+            //SHOW SPECIFIC SERVICE
+            Route::get('/services/{service}', [ServiceController::class, 'show']); 
+
+
+     
+
 
             //GET PROFILE
         Route::middleware(['auth:sanctum'])->get('/user/profile', [AuthController::class, 'getProfile']);
@@ -42,6 +51,13 @@ use Illuminate\Support\Facades\Route;
         Route::middleware(['auth:sanctum'])->get('/reports', action: [ReportController::class, 'index']); // show all reports
         //SHOW SPECIFIC REPORT
         Route::middleware(['auth:sanctum'])->get('/reports/{id}', action: [ReportController::class, 'show']); // show a specific report
+        //PRESENT ALL REPORTS
+        Route::middleware(['auth:sanctum'])->get('/reports', action: [ReportController::class, 'index']); // show all reports
+
+        //PRESENT ALL REVIEWS
+        Route::middleware(['auth:sanctum'])->get('/reviews', action: [ReviewController::class, 'index']); // show all reviews
+        Route::middleware(['auth:sanctum'])->post('/reviews', action: [ReviewController::class, 'store']); // post a review
+
 
 
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
@@ -80,6 +96,21 @@ use Illuminate\Support\Facades\Route;
            Route::get('/admin/books/{book}', [BookController::class, 'show']); // Update an books 
            Route::delete('/admin/books/{book}', [BookController::class, 'destroy']); // Delete an books 
            Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
+
+
+           //SERVICES MANAGEMENT ROUTES
+           Route::post('/admin/services', [ServiceController::class, 'store']); // Create a new service
+           Route::put('/admin/services/{service}', [ServiceController::class, 'update']); // show a specific service 
+           Route::delete('/admin/services/{service}', [ServiceController::class, 'destroy']); // Delete a service 
+           Route::patch('admin/services/{service}/restore', [ServiceController::class, 'restore']); // Reactivate a service
+
+
+        //REVIEW MANAGMENT ROUTES    
+        Route::patch('admin/reviews/{service}/approve', [ReviewController::class, 'approve']); // Reactivate a review
+        Route::patch('admin/reviews/{service}/decline', [ReviewController::class, 'decline']); // Decline a review
+        Route::delete('/admin/reviews/{review}', [ReviewController::class, 'destroy']); // Delete a review 
+    
+
         });
         //AUTHOR ROUTES
         Route::middleware(['auth:sanctum', 'check.author'])->group(function ()  {
