@@ -21,20 +21,20 @@ RUN apt-get update && apt-get install -y \
 # Install MongoDB PHP driver
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
-# Add MongoDB extension to php.ini
-RUN echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini
-
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set the working directory
 WORKDIR /var/www/html
 
-# Copy the entire application files
-COPY . .
+# Copy only the necessary files for Composer installation
+COPY composer.json composer.lock ./
 
 # Install Laravel dependencies with memory limit
 RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Copy the rest of the application files
+COPY . .
 
 # Set the proper permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -56,10 +56,6 @@ RUN echo '<VirtualHost *:10000>\n\
         Require all granted\n\
     </Directory>\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
-
-
-# Configure Apache to listen on port 10000
-RUN sed -i 's|Listen 80|Listen 10000|g' /etc/apache2/ports.conf
 
 # Enable the rewrite module
 RUN a2enmod rewrite
