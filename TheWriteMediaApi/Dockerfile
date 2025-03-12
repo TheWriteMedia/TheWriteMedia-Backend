@@ -21,6 +21,9 @@ RUN apt-get update && apt-get install -y \
 # Install MongoDB PHP driver
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
+# Add MongoDB extension to php.ini
+RUN echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
