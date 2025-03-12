@@ -27,7 +27,7 @@ class ContactUsMail extends Mailable
     public function build()
     {
         return $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
-            ->subject('New Contact Form Submission')
+            ->subject('The WriteMedia Contact Form')
             ->view('emails.contact')
             ->with('data', $this->data);
     }
