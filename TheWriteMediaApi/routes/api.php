@@ -7,11 +7,30 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
-
+use App\Mail\ContactUsMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
     Route::middleware(['cors'])->group(function () {
+
+
+        Route::post('/contact', function (Request $request) {
+            $request->validate([
+                'name' => 'required|string',
+                'email' => 'required|email',
+                'subject' => 'required|string',
+                'phone' => 'required|string|min:7|max:15',
+                'message' => 'required|string',
+            ]);
+        
+            $data = $request->all();
+        
+            Mail::to('support@studioofbooks.org')->send(new ContactUsMail($data));
+        
+            return response()->json(['message' => 'Email sent successfully'], 200);
+        });
+
         //GLOBAL ROUTES (CAN BE USE BY ADMINS AND AUTHORS)
             //ENTRY POINT
         Route::post('/register', [AuthController::class, 'register']);
