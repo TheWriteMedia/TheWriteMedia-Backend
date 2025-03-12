@@ -27,22 +27,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set the working directory
 WORKDIR /var/www/html
 
-# Copy only the necessary files for Composer installation
-COPY composer.json composer.lock ./
+# Copy the entire application files
+COPY . .
 
 # Install Laravel dependencies with memory limit
 RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Copy the rest of the application files
-COPY . .
 
 # Set the proper permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Generate application key if not set in .env (Render will provide .env variables)
-
-
-
 RUN php artisan key:generate
 
 # Clear and cache configuration
