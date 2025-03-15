@@ -7,6 +7,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\UpcomingBookFairController;
 use App\Mail\ContactUsMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
@@ -77,6 +78,9 @@ use Illuminate\Support\Facades\Route;
         Route::get('/reviews', action: [ReviewController::class, 'index']); // show all reviews
         Route::post('/reviews', action: [ReviewController::class, 'store']); // post a review
 
+        Route::get('/upcomingBookFairs', [UpcomingBookFairController::class, 'index']); // get all upcoming book fairs
+        Route::get('/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'show']); // Show an upcoming book fair 
+
 
 
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
@@ -129,6 +133,14 @@ use Illuminate\Support\Facades\Route;
             Route::patch('/admin/reviews/{review}/decline', [ReviewController::class, 'decline']); // Decline a review
             Route::delete('/admin/reviews/{review}', [ReviewController::class, 'destroy']); // Delete a review 
         
+
+            //UPCOMING BOOK FAIRS MANAGEMENT ROUTES
+           Route::post('/admin/upcomingBookFairs', [UpcomingBookFairController::class, 'store']); // Create a new upcoming book fair
+           Route::put('/admin/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'update']); // update an upcoming book fair 
+           Route::delete('/admin/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'destroy']); // Delete an upcoming book fair 
+         
+
+
 
         });
         //AUTHOR ROUTES

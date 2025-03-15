@@ -25,9 +25,9 @@ class Review extends Model
        parent::boot();
 
        // Automatically set 'status' to 'ACTIVE' when creating a news record
-       static::creating(function ($news) {
-           if (!$news->status) {
-               $news->status = 'PENDING';
+       static::creating(function ($review) {
+           if (!$review->status) {
+               $review->status = 'PENDING';
            }
        });
    }
