@@ -16,13 +16,13 @@ class UpcomingBookFair extends Model
 
    protected $fillable = [
         'book_fair_title',
-       'image_url',
-       'logo_url',
-       'month',
-       'duration',
-       'location',
-       'summary',
-       'status',
+        'image_url',
+        'logo_url',
+        'start_date',
+        'end_date',
+        'location',
+        'summary',
+        'status',
    ];
 
 

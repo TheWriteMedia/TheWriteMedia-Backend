@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
@@ -31,7 +32,9 @@ use Illuminate\Support\Facades\Route;
         
             return response()->json(['message' => 'Email sent successfully'], 200);
         });
-
+        Route::post('/create-checkout-session', [PaymentController::class, 'createCheckoutSession']);
+        Route::get('/checkout/success', [PaymentController::class, 'success'])->name('checkout.success');
+        Route::get('/checkout/cancel', [PaymentController::class, 'cancel'])->name('checkout.cancel');
         //GLOBAL ROUTES (CAN BE USE BY ADMINS AND AUTHORS)
             //ENTRY POINT
         Route::post('/register', [AuthController::class, 'register']);
@@ -150,5 +153,7 @@ use Illuminate\Support\Facades\Route;
             });
           
         });
+
+       
 
     });

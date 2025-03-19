@@ -31,18 +31,18 @@ class UpcomingBookFairController extends Controller
             'book_fair_title' => 'required|string|max:1000',
             'image_url' => 'required|string|max:1000',
             'logo_url' => 'required|string|max:1000',
-            'month' => 'required|string|max:1000',
-            'duration' => 'required|string|max:1000',
+            'start_date' => 'required|date', // Validate start date
+            'end_date' => 'required|date|after_or_equal:start_date', // Validate end date
             'location' => 'required|string|max:1000',
             'summary' => 'required|string|max:1000',
         ]);
-
+    
         $upcomingbookfair = UpcomingBookFair::create([
             'book_fair_title' => $request->book_fair_title,
             'image_url' => $request->image_url,
             'logo_url' => $request->logo_url,
-            'month' => $request->month,
-            'duration' => $request->duration,
+            'start_date' => $request->start_date, // Store start date
+            'end_date' => $request->end_date, // Store end date
             'location' => $request->location,
             'summary' => $request->summary,
             'status' => 'ACTIVE', // Default status
@@ -74,8 +74,8 @@ class UpcomingBookFairController extends Controller
         'book_fair_title' => 'required|string|max:1000',
         'image_url' => 'required|string|max:1000',
         'logo_url' => 'required|string|max:1000',
-        'month' => 'required|string|max:1000',
-        'duration' => 'required|string|max:1000',
+        'start_date' => 'required|date', // Validate start date
+        'end_date' => 'required|date|after_or_equal:start_date', // Validate end date
         'location' => 'required|string|max:1000',
         'summary' => 'required|string|max:1000',
     ]);
