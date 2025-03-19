@@ -68,7 +68,7 @@
         <p>Thank you for your purchase.</p>
       
         <p>Amount Paid: ${{ $session->amount_total / 100 }}</p>
-        <a href="http://localhost:5173" class="home-button">Return to Home</a>
+        <a href="https://thewritemedia-backend.onrender.com" class="home-button">Return to Home</a>
     </div>
 </body>
 </html>
