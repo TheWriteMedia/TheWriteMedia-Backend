@@ -66,7 +66,7 @@
     <div class="modal">
         <h1>Payment Cancelled</h1>
         <p>Your payment was not completed. You can try again.</p>
-        <a href="https://thewritemedia-backend.onrender.com" class="home-button">Return to Home</a>
+        <a href="https://thewritemedia.org" class="home-button">Return to Home</a>
     </div>
 </body>
 </html>
