@@ -22,6 +22,7 @@ class UpcomingBookFair extends Model
         'end_date',
         'location',
         'summary',
+        'theme_color', 
         'status',
    ];
 

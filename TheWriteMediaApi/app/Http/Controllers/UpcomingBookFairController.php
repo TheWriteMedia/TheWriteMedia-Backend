@@ -34,6 +34,7 @@ class UpcomingBookFairController extends Controller
             'start_date' => 'required|date', // Validate start date
             'end_date' => 'required|date|after_or_equal:start_date', // Validate end date
             'location' => 'required|string|max:1000',
+             'theme_color' => 'required|string|max:7',
             'summary' => 'required|string|max:1000',
         ]);
     
@@ -45,6 +46,7 @@ class UpcomingBookFairController extends Controller
             'end_date' => $request->end_date, // Store end date
             'location' => $request->location,
             'summary' => $request->summary,
+            'theme_color' => $request->theme_color,
             'status' => 'ACTIVE', // Default status
         ]);
 
@@ -78,6 +80,7 @@ class UpcomingBookFairController extends Controller
         'end_date' => 'required|date|after_or_equal:start_date', // Validate end date
         'location' => 'required|string|max:1000',
         'summary' => 'required|string|max:1000',
+        'theme_color' => 'required|string|max:7',
     ]);
 
      // Update book fair details

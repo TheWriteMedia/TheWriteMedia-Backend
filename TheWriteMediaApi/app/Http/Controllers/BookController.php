@@ -10,6 +10,34 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
+
+    public function setBookOfTheMonth(Request $request, $bookId)
+    {
+        // Ensure the user is an admin
+        $user = $request->user();
+        if (!$user || $user->user_type !== User::USER_TYPE_WEB_ADMIN) {
+            return response()->json(['error' => 'Unauthorized.'], 403);
+        }
+
+        // Find the book
+        $book = Book::find($bookId);
+        if (!$book) {
+            return response()->json(['error' => 'Book not found.'], 404);
+        }
+
+        // Toggle the "Book of the Month" status
+        $newStatus = !$book->isBookofTheMonth;
+
+        // Update the selected book's "Book of the Month" status
+        $book->update(['isBookofTheMonth' => $newStatus]);
+
+        return response()->json([
+            'message' => 'Book of the Month status toggled successfully.',
+            'book' => $book
+        ], 200);
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -91,6 +119,7 @@ class BookController extends Controller
             'description' => $request->description,
             'additional_info' => $request->additional_info,
             'img_urls' => $request->img_urls,
+            'isBookofTheMonth' => false,
             'status' => 'ACTIVE',
         ]);
     

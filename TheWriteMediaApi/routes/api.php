@@ -61,7 +61,7 @@ use Illuminate\Support\Facades\Route;
             Route::get('/services/{service}', [ServiceController::class, 'show']); 
 
 
-     
+            Route::put('/books/{bookId}/set-book-of-the-month', [BookController::class, 'setBookOfTheMonth'])->middleware('auth:sanctum');
 
 
             //GET PROFILE
