@@ -37,6 +37,7 @@ class Book extends Model
        'description',
        'additional_info',
        'img_urls',
+       'isBookofTheMonth',
        'status'
    ];
 
@@ -67,8 +68,15 @@ class Book extends Model
            if (!$book->status) {
                $book->status = 'ACTIVE';
            }
+           if (!$book->isBookofTheMonth) {
+            $book->isBookofTheMonth = false;
+        }
        });
+
+       
    }
+
+  
 
    public function user()
    {
