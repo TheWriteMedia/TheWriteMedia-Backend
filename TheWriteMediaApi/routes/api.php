@@ -8,6 +8,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\UpcomingBookFairController;
 use App\Mail\ContactUsMail;
 use Illuminate\Support\Facades\Mail;
@@ -84,7 +85,9 @@ use Illuminate\Support\Facades\Route;
         Route::get('/upcomingBookFairs', [UpcomingBookFairController::class, 'index']); // get all upcoming book fairs
         Route::get('/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'show']); // Show an upcoming book fair 
 
-
+        
+        Route::get('/testimonials', [TestimonialController::class, 'index']); // get all testimonials
+        Route::get('/testimonials/{testimonial}', [TestimonialController::class, 'show']); // Show a testimonial
 
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
  
@@ -128,7 +131,7 @@ use Illuminate\Support\Facades\Route;
            Route::post('/admin/services', [ServiceController::class, 'store']); // Create a new service
            Route::put('/admin/services/{service}', [ServiceController::class, 'update']); // show a specific service 
            Route::delete('/admin/services/{service}', [ServiceController::class, 'destroy']); // Delete a service 
-           Route::patch('admin/services/{service}/restore', [ServiceController::class, 'restore']); // Reactivate a service
+          
 
 
             //REVIEW MANAGMENT ROUTES    
@@ -142,7 +145,10 @@ use Illuminate\Support\Facades\Route;
            Route::put('/admin/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'update']); // update an upcoming book fair 
            Route::delete('/admin/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'destroy']); // Delete an upcoming book fair 
          
-
+           //TESTIMONIALS MANAGEMENT ROUTES
+           Route::post('/admin/testimonials', [TestimonialController::class, 'store']); // Create a new testimonial
+           Route::put('/admin/testimonials/{testimonial}', [TestimonialController::class, 'update']); // update a testimonial
+           Route::delete('/admin/testimonials/{testimonial}', [TestimonialController::class, 'destroy']); // Delete a testimonial
 
 
         });
