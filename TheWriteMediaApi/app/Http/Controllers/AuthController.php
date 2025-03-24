@@ -202,30 +202,30 @@ class AuthController extends Controller
         ];
     }
     public function forgotPassword(Request $request): JsonResponse
-{
-    // Validate the incoming request data
-    $request->validate(['user_email' => 'required|email']);
+    {
+        // Validate the incoming request data
+        $request->validate(['user_email' => 'required|email']);
 
-    // Find the user by email
-    $user = User::where('user_email', $request->user_email)->first();
+        // Find the user by email
+        $user = User::where('user_email', $request->user_email)->first();
 
-    if (!$user) {
-        return response()->json(['message' => 'No user found with this email address.'], 404);
-    }
+        if (!$user) {
+            return response()->json(['message' => 'No user found with this email address.'], 404);
+        }
 
-    // Create a token
-    $token = Str::random(60);
+        // Create a token
+        $token = Str::random(60);
 
-    // Store the token in the password_resets collection
-    PasswordReset::updateOrCreate(
-        ['user_email' => $request->user_email],
-        ['token' => $token, 'created_at' => now()]
-    );
+        // Store the token in the password_resets collection
+        PasswordReset::updateOrCreate(
+            ['user_email' => $request->user_email],
+            ['token' => $token, 'created_at' => now()]
+        );
 
-    // Send email with only the reset token
-    Mail::to($user->user_email)->send(new PasswordResetMail($token)); // Ensure this mail class is set up
+        // Send email with only the reset token
+        Mail::to($user->user_email)->send(new PasswordResetMail($token)); // Ensure this mail class is set up
 
-    return response()->json(['message' => 'Password reset token has been sent to your email.'], 200);
+        return response()->json(['message' => 'Password reset token has been sent to your email.'], 200);
     }
 
     public function resetPassword(Request $request): JsonResponse
