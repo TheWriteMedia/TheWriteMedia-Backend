@@ -48,6 +48,7 @@ use Illuminate\Support\Facades\Route;
         Route::post('/reset-password', [AuthController::class, 'resetPassword']);
         //PRESENT ALL BOOKS
         Route::get('/books', [BookController::class, 'index']);
+        Route::get('/books/search', [BookController::class, 'search']);
 
             //PRESENT SPECIFIC BOOK
         Route::get('/books/{book}', [BookController::class, 'show']); 
