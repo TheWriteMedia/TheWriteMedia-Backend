@@ -59,6 +59,26 @@ class BookController extends Controller
     }
     
 
+    public function search(Request $request)
+{
+    $query = $request->input('query');
+    
+    if (empty($query)) {
+        return response()->json(['books' => []]);
+    }
+
+    $books = Book::with('author')
+        ->where('status', 'ACTIVE')
+        ->search($query)
+        ->latest()
+        ->get();
+
+    return response()->json([
+        'books' => $books
+    ]);
+}
+
+
     /**
      * Store a newly created resource in storage.
      */

@@ -84,7 +84,7 @@ class Book extends Model
    }
      /**
      * A book belongs to an author.
-     */
+     */ 
 
    public function author()
     {
@@ -102,6 +102,21 @@ class Book extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class, 'book_id', '_id');
+    }
+
+    // Add this to your Book model
+    public function scopeSearch($query, $searchTerm)
+    {
+        return $query->where(function($q) use ($searchTerm) {
+            $q->where('book_title', 'like', "%{$searchTerm}%")
+            ->orWhere('paperback_isbn', 'like', "%{$searchTerm}%")
+            ->orWhere('hardback_isbn', 'like', "%{$searchTerm}%")
+            ->orWhere('ebook_isbn', 'like', "%{$searchTerm}%")
+            ->orWhere('description', 'like', "%{$searchTerm}%")
+            ->orWhereHas('author', function($authorQuery) use ($searchTerm) {
+                $authorQuery->where('author_name', 'like', "%{$searchTerm}%");
+            });
+        });
     }
 
 }
