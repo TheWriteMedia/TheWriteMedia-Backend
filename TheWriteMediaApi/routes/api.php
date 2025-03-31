@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\AuthorReviewsController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PaymentController;
@@ -86,6 +87,10 @@ use Illuminate\Support\Facades\Route;
         Route::get('/upcomingBookFairs', [UpcomingBookFairController::class, 'index']); // get all upcoming book fairs
         Route::get('/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'show']); // Show an upcoming book fair 
 
+
+        Route::get('/authorReviews', [AuthorReviewsController::class, 'index']); // get all upcoming book fairs
+        Route::get('/authorReviews/{authorReviews}', [AuthorReviewsController::class, 'show']); // Show an author review
+
         
         Route::get('/testimonials', [TestimonialController::class, 'index']); // get all testimonials
         Route::get('/testimonials/{testimonial}', [TestimonialController::class, 'show']); // Show a testimonial
@@ -145,6 +150,12 @@ use Illuminate\Support\Facades\Route;
            Route::post('/admin/upcomingBookFairs', [UpcomingBookFairController::class, 'store']); // Create a new upcoming book fair
            Route::put('/admin/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'update']); // update an upcoming book fair 
            Route::delete('/admin/upcomingBookFairs/{upcomingBookFair}', [UpcomingBookFairController::class, 'destroy']); // Delete an upcoming book fair 
+
+
+            //UPCOMING BOOK FAIRS MANAGEMENT ROUTES
+            Route::post('/admin/authorReviews', [AuthorReviewsController::class, 'store']); // Create a new author review
+            Route::put('/admin/authorReviews/{authorReviews}', [AuthorReviewsController::class, 'update']); // update an author review
+            Route::delete('/admin/authorReviews/{authorReviews}', [AuthorReviewsController::class, 'destroy']); // Delete an author review
          
            //TESTIMONIALS MANAGEMENT ROUTES
            Route::post('/admin/testimonials', [TestimonialController::class, 'store']); // Create a new testimonial
