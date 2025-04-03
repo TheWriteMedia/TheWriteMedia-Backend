@@ -82,13 +82,15 @@ public function store(Request $request)
     /**
      * Display the specified resource.
      */
-    public function show(Author $author)
-    {
-         // Return the author along with the associated user
+
+     public function show(Request $request, Author $author)
+     {
+     
          return response()->json([
             'author' => $author->load('user')
         ]);
-    }
+
+     }
 
     /**
      * Update the specified resource in storage.

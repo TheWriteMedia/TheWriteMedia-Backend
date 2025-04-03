@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddOnController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\AuthorReviewsController;
@@ -58,13 +59,19 @@ use Illuminate\Support\Facades\Route;
             //SHOW SPECIFIC NEWS
         Route::get('/news/{news}', [NewsController::class, 'show']); 
 
-            //PRESENT ALL SERVICES
-            Route::get('/services', action: [ServiceController::class, 'index']); 
-            //SHOW SPECIFIC SERVICE
-            Route::get('/services/{service}', [ServiceController::class, 'show']); 
+        //PRESENT ALL SERVICES
+        Route::get('/services', action: [ServiceController::class, 'index']); 
+        //SHOW SPECIFIC SERVICE
+        Route::get('/services/{service}', [ServiceController::class, 'show']); 
 
 
-            Route::put('/books/{bookId}/set-book-of-the-month', [BookController::class, 'setBookOfTheMonth'])->middleware('auth:sanctum');
+        //PRESENT ALL ADDONS
+        Route::get('/addOns', action: [AddOnController::class, 'index']); 
+        //SHOW SPECIFIC ADDON
+        Route::get('/addOns/{addOn}', [AddOnController::class, 'show']); 
+
+
+        Route::put('/books/{bookId}/set-book-of-the-month', [BookController::class, 'setBookOfTheMonth'])->middleware('auth:sanctum');
 
 
             //GET PROFILE
@@ -132,14 +139,11 @@ use Illuminate\Support\Facades\Route;
            Route::delete('/admin/books/{book}', [BookController::class, 'destroy']); // Delete an books 
            Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
 
-
            //SERVICES MANAGEMENT ROUTES
            Route::post('/admin/services', [ServiceController::class, 'store']); // Create a new service
            Route::put('/admin/services/{service}', [ServiceController::class, 'update']); // show a specific service 
            Route::delete('/admin/services/{service}', [ServiceController::class, 'destroy']); // Delete a service 
-          
-
-
+    
             //REVIEW MANAGMENT ROUTES    
             Route::patch('/admin/reviews/{review}/approve', [ReviewController::class, 'approve']); // Reactivate a review
             Route::patch('/admin/reviews/{review}/decline', [ReviewController::class, 'decline']); // Decline a review
@@ -162,6 +166,12 @@ use Illuminate\Support\Facades\Route;
            Route::put('/admin/testimonials/{testimonial}', [TestimonialController::class, 'update']); // update a testimonial
            Route::delete('/admin/testimonials/{testimonial}', [TestimonialController::class, 'destroy']); // Delete a testimonial
 
+
+            //ADDONS MANAGEMENT ROUTES
+            
+            Route::post('/admin/addOns', [AddOnController::class, 'store']); // Create a new service
+            Route::put('/admin/addOns/{addOn}', [AddOnController::class, 'update']); // show a specific service 
+            Route::delete('/admin/addOns/{addOn}', [AddOnController::class, 'destroy']); // Delete a service 
 
         });
         //AUTHOR ROUTES
