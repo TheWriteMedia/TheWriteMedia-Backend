@@ -15,10 +15,17 @@ class Author extends Model
 
     protected $fillable = [
         'user_id',
+        'unique_author_id',
         'author_name',
         'author_country',
+        'author_sex',
         'author_age',
-        'author_sex'
+        'author_address_line_1',
+        'author_address_line_2',
+        'author_city',
+        'author_contact_no',
+        'author_zip',
+        'author_po_box'
     ];
 
     // Author Model

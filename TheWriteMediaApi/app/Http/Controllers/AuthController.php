@@ -184,8 +184,8 @@ class AuthController extends Controller
             ], 401); // Return HTTP 401 Unauthorized
         }
     
-  // Revoke all existing tokens for the user
-  $user->tokens()->delete();
+        // Revoke all existing tokens for the user
+        $user->tokens()->delete();
 
         $token = $user->createToken($user->user_name . ' Auth-Token')->plainTextToken;
     

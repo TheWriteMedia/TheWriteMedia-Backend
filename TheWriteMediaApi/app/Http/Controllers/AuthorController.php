@@ -33,10 +33,17 @@ public function store(Request $request)
     try {
         // Validate the incoming request
         $fields = $request->validate([
+            'unique_author_id' => 'nullable|string|max:255',
             'author_name' => 'required|string|max:255',
             'author_country' => 'required|string|max:255',
-            'author_age' => 'required|string|max:255',
-            'author_sex' => 'required|string|max:255',
+            'author_sex' => 'nullable|string|max:255',
+            'author_age' => 'nullable|string|max:255',
+            'author_address_line_1' => 'required|string|max:255',
+            'author_address_line_2' => 'nullable|string|max:255',
+            'author_city' => 'required|string|max:255',
+            'author_contact_no' => 'required|string|max:255',
+            'author_zip' => 'required|string|max:255',
+            'author_po_box' => 'required|string|max:255',
             'user_email' => 'required|email|unique:users,user_email',
             'user_password' => 'required|confirmed|min:8',
             'user_profile' => 'required|string' // Validate image
@@ -55,10 +62,17 @@ public function store(Request $request)
         // Create the Author record
         $author = Author::create([
             'user_id' => $user->id,
+            'unique_author_id' => $fields['unique_author_id'],
             'author_name' => $fields['author_name'],
             'author_country' => $fields['author_country'],
-            'author_age' => $fields['author_age'],
             'author_sex' => $fields['author_sex'],
+            'author_age' => $fields['author_age'],
+            'author_address_line_1' => $fields['author_address_line_1'],
+            'author_address_line_2' => $fields['author_address_line_2'],
+            'author_city' => $fields['author_city'],
+            'author_contact_no' => $fields['author_contact_no'],
+            'author_zip' => $fields['author_zip'],
+            'author_po_box' => $fields['author_po_box'],
         ]);
 
         return response()->json([
@@ -107,10 +121,17 @@ public function store(Request $request)
     
             // Validate the incoming request
             $fields = $request->validate([
+                'unique_author_id' => 'nullable|string|max:255',
                 'author_name' => 'required|string|max:255',
                 'author_country' => 'required|string|max:255',
-                'author_age' => 'required|string|max:255',
-                'author_sex' => 'required|string|max:255',
+                'author_sex' => 'nullable|string|max:255',
+                'author_age' => 'nullable|string|max:255',
+                'author_address_line_1' => 'required|string|max:255',
+                'author_address_line_2' => 'nullable|string|max:255',
+                'author_city' => 'required|string|max:255',
+                'author_contact_no' => 'required|string|max:255',
+                'author_zip' => 'required|string|max:255',
+                'author_po_box' => 'required|string|max:255',
                 'user_email' => 'required|email|unique:users,user_email,' . $user->id,
                 'user_password' => 'nullable|confirmed|min:8',
                 'user_profile' => 'nullable|string',
@@ -126,10 +147,17 @@ public function store(Request $request)
     
             // Update author details
             $author->update([
+                'unique_author_id' => $fields['unique_author_id'],
                 'author_name' => $fields['author_name'],
                 'author_country' => $fields['author_country'],
-                'author_age' => $fields['author_age'],
                 'author_sex' => $fields['author_sex'],
+                'author_age' => $fields['author_age'],
+                'author_address_line_1' => $fields['author_address_line_1'],
+                'author_address_line_2' => $fields['author_address_line_2'],
+                'author_city' => $fields['author_city'],
+                'author_contact_no' => $fields['author_contact_no'],
+                'author_zip' => $fields['author_zip'],
+                'author_po_box' => $fields['author_po_box'],
             ]);
     
             // If the updated user is an author, update the author_name in all associated books

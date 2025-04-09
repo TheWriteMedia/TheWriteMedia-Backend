@@ -71,7 +71,7 @@ use Illuminate\Support\Facades\Route;
         Route::get('/addOns/{addOn}', [AddOnController::class, 'show']); 
 
 
-        Route::put('/books/{bookId}/set-book-of-the-month', [BookController::class, 'setBookOfTheMonth'])->middleware('auth:sanctum');
+       
 
 
             //GET PROFILE
@@ -136,8 +136,11 @@ use Illuminate\Support\Facades\Route;
            Route::post('/admin/books', [BookController::class, 'store']); // Create a new books
            Route::put('/admin/books/{book}', [BookController::class, 'update']); // show a specific book 
            Route::get('/admin/books/{book}', [BookController::class, 'show']); // Update an books 
-           Route::delete('/admin/books/{book}', [BookController::class, 'destroy']); // Delete an books 
-           Route::patch('admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate an books
+           Route::delete('/admin/books/{book}', [BookController::class, 'destroy']); // Hide an book
+           Route::delete('/admin/books/{book}/permanentlyDelete', [BookController::class, 'permanentlyDelete']); // Delete a book 
+           Route::patch('/admin/books/{book}/restore', [BookController::class, 'restore']); // Reactivate a book
+           Route::put('/admin/books/{bookId}/set-book-of-the-month', [BookController::class, 'setBookOfTheMonth']);
+           Route::put('/admin/books/{bookId}/setIsFeatured', [BookController::class, 'setIsFeatured']);
 
            //SERVICES MANAGEMENT ROUTES
            Route::post('/admin/services', [ServiceController::class, 'store']); // Create a new service
@@ -168,7 +171,6 @@ use Illuminate\Support\Facades\Route;
 
 
             //ADDONS MANAGEMENT ROUTES
-            
             Route::post('/admin/addOns', [AddOnController::class, 'store']); // Create a new service
             Route::put('/admin/addOns/{addOn}', [AddOnController::class, 'update']); // show a specific service 
             Route::delete('/admin/addOns/{addOn}', [AddOnController::class, 'destroy']); // Delete a service 
