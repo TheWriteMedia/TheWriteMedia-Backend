@@ -37,22 +37,40 @@ class BookController extends Controller
         ], 200);
     }
 
+    public function setIsFeatured(Request $request, $bookId)
+    {
+        // Ensure the user is an admin
+        $user = $request->user();
+        if (!$user || $user->user_type !== User::USER_TYPE_WEB_ADMIN) {
+            return response()->json(['error' => 'Unauthorized.'], 403);
+        }
+
+        // Find the book
+        $book = Book::find($bookId);
+        if (!$book) {
+            return response()->json(['error' => 'Book not found.'], 404);
+        }
+
+        // Toggle the "isFeatured" status
+        $newStatus = !$book->isFeatured;
+
+        // Update the selected book's "isFeatured" status
+        $book->update(['isFeatured' => $newStatus]);
+
+        return response()->json([
+            'message' => 'Featured status toggled successfully.',
+            'book' => $book
+        ], 200);
+    }
 
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        // Get the currently authenticated user (if any)
-        $user = $request->user();
-    
-        // If the user is an admin, show all books; otherwise, show only active books
-        if ($user && $user->user_type === User::USER_TYPE_WEB_ADMIN) {
+       
             $books = Book::with('author')->latest()->get();
-        } else {
-            $books = Book::with('author')->where('status', 'ACTIVE')->latest()->get();
-        }
-    
+      
         return response()->json([
             'books' => $books
         ]);
@@ -87,6 +105,7 @@ class BookController extends Controller
         $fields = $request->validate([
             'author_name' => 'required|string|max:255',
             'book_title' => 'required|string|max:255',
+            'book_published_date' => 'required|date',
 
             'paperback_price_increase' => 'nullable|numeric',
             'paperback_srp' => 'nullable|numeric',
@@ -120,6 +139,7 @@ class BookController extends Controller
         $book = Book::create(attributes: [
             'author_id' => $author->user_id,
             'book_title' => $request->book_title,
+            'book_published_date' => $request->book_published_date,
           
             'paperback_price_increase' => number_format((float)$request->paperback_price_increase, 2, '.', ''),
             'paperback_srp' => number_format((float)$request->paperback_srp, 2, '.', ''),
@@ -140,6 +160,7 @@ class BookController extends Controller
             'additional_info' => $request->additional_info,
             'img_urls' => $request->img_urls,
             'isBookofTheMonth' => false,
+            'isFeatured' => false,
             'status' => 'ACTIVE',
         ]);
     
@@ -185,6 +206,7 @@ class BookController extends Controller
     $fields = $request->validate([
         'author_name' => 'required|string|max:255',
         'book_title' => 'required|string|max:255',
+        'book_published_date' => 'required|date',
 
         'paperback_price_increase' => 'nullable|numeric',
         'paperback_srp' => 'nullable|numeric',
@@ -219,6 +241,7 @@ class BookController extends Controller
 
         'author_id' => $author->user_id, // Update author ID
         'book_title' => $fields['book_title'],
+        'book_published_date' => $fields['book_published_date'],
      
         'paperback_price_increase' => number_format((float)$fields['paperback_price_increase'], 2, '.', ''),
         'paperback_srp' => number_format((float)$fields['paperback_srp'], 2, '.', ''),
@@ -260,12 +283,20 @@ class BookController extends Controller
 
         return response()->json(['message' => 'Book has been deactivated.'], 200);
     }
+    public function permanentlyDelete(Book $book)
+    {
+        // Delete the service
+        $book->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Book deleted successfully',
+        ], 200);
+    }
     public function restore(Book $book)
     {
-
         // Update the user's status to ACTIVE
         $book->update(['status' => 'ACTIVE']);
-
         return response()->json(['message' => 'Book has been reactivated.'], 200);
     }
 }

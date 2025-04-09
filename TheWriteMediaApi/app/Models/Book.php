@@ -18,6 +18,8 @@ class Book extends Model
      
        'author_id',
        'book_title',
+       'book_published_date',
+       
       
        'paperback_price_increase',
        'paperback_srp',
@@ -37,7 +39,10 @@ class Book extends Model
        'description',
        'additional_info',
        'img_urls',
+      
        'isBookofTheMonth',
+       'isFeatured',
+
        'status'
    ];
 
