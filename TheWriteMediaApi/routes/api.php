@@ -11,8 +11,11 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\TotalAccumulatedRoyaltyController;
 use App\Http\Controllers\UpcomingBookFairController;
+use App\Http\Controllers\WithdrawalRequestController;
 use App\Mail\ContactUsMail;
+use App\Models\TotalAccumulatedRoyalty;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,24 +42,24 @@ use Illuminate\Support\Facades\Route;
         Route::get('/checkout/success', [PaymentController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel', [PaymentController::class, 'cancel'])->name('checkout.cancel');
         //GLOBAL ROUTES (CAN BE USE BY ADMINS AND AUTHORS)
-            //ENTRY POINT
+        //ENTRY POINT
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
-            //END POINT
+        //END POINT
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-            //FORGOT PASSWORD
+        //FORGOT PASSWORD
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-            //RESET PASSWORD
+        //RESET PASSWORD
         Route::post('/reset-password', [AuthController::class, 'resetPassword']);
         //PRESENT ALL BOOKS
         Route::get('/books', [BookController::class, 'index']);
         Route::get('/books/search', [BookController::class, 'search']);
 
-            //PRESENT SPECIFIC BOOK
+        //PRESENT SPECIFIC BOOK
         Route::get('/books/{book}', [BookController::class, 'show']); 
-            //PRESENT ALL NEWS
+        //PRESENT ALL NEWS
         Route::get('/news', action: [NewsController::class, 'index']); 
-            //SHOW SPECIFIC NEWS
+        //SHOW SPECIFIC NEWS
         Route::get('/news/{news}', [NewsController::class, 'show']); 
 
         //PRESENT ALL SERVICES
@@ -71,12 +74,9 @@ use Illuminate\Support\Facades\Route;
         Route::get('/addOns/{addOn}', [AddOnController::class, 'show']); 
 
 
-       
-
-
-            //GET PROFILE
+        //GET PROFILE
         Route::middleware(['auth:sanctum'])->get('/user/profile', [AuthController::class, 'getProfile']);
-            //EDIT PROFILE
+        //EDIT PROFILE
         Route::middleware(['auth:sanctum'])->put('/user/profile', [AuthController::class, 'updateProfile']);
 
 
@@ -102,6 +102,7 @@ use Illuminate\Support\Facades\Route;
         Route::get('/testimonials', [TestimonialController::class, 'index']); // get all testimonials
         Route::get('/testimonials/{testimonial}', [TestimonialController::class, 'show']); // Show a testimonial
 
+       
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
  
         //WEB ADMIN ROUTES
@@ -170,19 +171,38 @@ use Illuminate\Support\Facades\Route;
            Route::delete('/admin/testimonials/{testimonial}', [TestimonialController::class, 'destroy']); // Delete a testimonial
 
 
-            //ADDONS MANAGEMENT ROUTES
-            Route::post('/admin/addOns', [AddOnController::class, 'store']); // Create a new service
-            Route::put('/admin/addOns/{addOn}', [AddOnController::class, 'update']); // show a specific service 
-            Route::delete('/admin/addOns/{addOn}', [AddOnController::class, 'destroy']); // Delete a service 
+           //ADDONS MANAGEMENT ROUTES
+           Route::post('/admin/addOns', [AddOnController::class, 'store']); // Create a new service
+           Route::put('/admin/addOns/{addOn}', [AddOnController::class, 'update']); // show a specific service 
+           Route::delete('/admin/addOns/{addOn}', [AddOnController::class, 'destroy']); // Delete a service 
+
+
+           //WITHDRAWAL REQUEST MANAGEMENT ROUTES
+           Route::get('/admin/withdrawalRequests', [WithdrawalRequestController::class, 'index']); // get all withdrawal requests
+           Route::get('/admin/withdrawalRequests/{withdrawalRequest}', [WithdrawalRequestController::class, 'show']); // Show a withdrawal request
+           Route::put('/admin/withdrawalRequests/{withdrawalRequest}', [WithdrawalRequestController::class, 'update']); // show a specific service 
+           Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/cancel', [WithdrawalRequestController::class, 'cancel']); // cancel the withdrawal request
+           Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-processing', [WithdrawalRequestController::class, 'markAsProcessing']);
+           Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-mailed', [WithdrawalRequestController::class, 'markAsMailed']);
+           Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-completed', [WithdrawalRequestController::class, 'markAsCompleted']);
 
         });
-        //AUTHOR ROUTES
-        Route::middleware(['auth:sanctum', 'check.author'])->group(function ()  {
-            Route::get('/author/dashboard', function () {
-                return response()->json(['message' => 'Welcome Author! Your middleware is working.']);
+            //AUTHOR ROUTES
+            Route::middleware(['auth:sanctum', 'check.author'])->group(function ()  {
+                Route::get('/author/dashboard', function () {
+                    return response()->json(['message' => 'Welcome Author! Your middleware is working.']);
+                });
+
+
+                //WITHDRAWAL REQUEST MANAGEMENT ROUTES
+                Route::get('/author/my-withdrawal-requests', [WithdrawalRequestController::class, 'authorRequests']); // 
+
+                //WITHDRAWAL REQUEST MANAGEMENT ROUTES
+                Route::post('/author/withdrawalRequests', [WithdrawalRequestController::class, 'store']); // Create a new withdrawal request
+            
+                //TOTAL ACCUMULATED MANAGEMENT ROUTES
+                Route::get('/author/totalAccumulatedRoyalty', [TotalAccumulatedRoyaltyController::class, 'index']); // get the totalAccumulatedRoyalty
             });
-          
-        });
 
        
 

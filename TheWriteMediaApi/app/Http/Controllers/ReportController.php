@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Report;
+use App\Models\TotalAccumulatedRoyalty;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -125,6 +126,20 @@ public function store(Request $request)
             'quarter' => $quarter, 
             'year' => $year, 
         ]);
+        
+
+        $existing = TotalAccumulatedRoyalty::where('user_id', $authorId)->first();
+
+        if ($existing) {
+            $existing->value += $totalRoyalty;
+            $existing->save();
+        } else {
+            TotalAccumulatedRoyalty::create([
+                'user_id' => $authorId,
+                'value' => $totalRoyalty
+            ]);
+        }
+            
 
         return response()->json([
             'status' => 'success',
@@ -206,6 +221,9 @@ public function update(Request $request, $id)
             ], 404);
         }
 
+         // Store the original royalty value before any changes
+         $originalRoyalty = $report->total_royalty;
+
         // Ensure the book exists and belongs to the author
         $book = Book::where('_id', $report->book_id)
                     ->where('author_id', $report->author_id)
@@ -278,7 +296,28 @@ public function update(Request $request, $id)
 
         // Update total royalty (rounded to 2 decimal places) and save the report
         $report->total_royalty = round($totalRoyalty, 2);
+
+        // Calculate the difference between new and original royalty
+        $royaltyDifference = round($totalRoyalty, 2) - $originalRoyalty;
+
         $report->save();
+
+          // Only update accumulated royalty if there's a difference
+          if ($royaltyDifference != 0) {
+            $existing = TotalAccumulatedRoyalty::where('user_id', $report->author_id)->first();
+            
+            if ($existing) {
+                $existing->value += $royaltyDifference;
+                $existing->save();
+            } else {
+                // This case shouldn't normally happen if you create records on report creation
+                TotalAccumulatedRoyalty::create([
+                    'user_id' => $report->author_id,
+                    'value' => $totalRoyalty
+                ]);
+            }
+        }
+
 
         return response()->json([
             'status' => 'success',
@@ -296,14 +335,40 @@ public function update(Request $request, $id)
 
 
     /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Report $report)
-    {
-       // Delete the post
-       $report->delete();
-       return response()->json([
-           'message' => 'Report deleted successfully.'
-       ]);
+ * Remove the specified resource from storage.
+ */
+public function destroy(Report $report)
+{
+    try {
+        // Get the royalty value before deletion
+        $royaltyToSubtract = $report->total_royalty;
+        $authorId = $report->author_id;
+
+        // Delete the report
+        $report->delete();
+
+        // Update the accumulated royalty
+        $existing = TotalAccumulatedRoyalty::where('user_id', $authorId)->first();
+
+        if ($existing) {
+            // Ensure we don't go negative (just in case)
+            $existing->value = max(0, $existing->value - $royaltyToSubtract);
+            $existing->save();
+        }
+        // If no existing record, that means this was the only report (and it's now deleted)
+        // so we don't need to create a record with negative value
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Report deleted successfully.'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to delete report',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 }
