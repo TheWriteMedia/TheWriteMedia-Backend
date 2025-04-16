@@ -97,12 +97,8 @@ use Illuminate\Support\Facades\Route;
 
         Route::get('/authorReviews', [AuthorReviewsController::class, 'index']); // get all upcoming book fairs
         Route::get('/authorReviews/{authorReviews}', [AuthorReviewsController::class, 'show']); // Show an author review
-
-        
         Route::get('/testimonials', [TestimonialController::class, 'index']); // get all testimonials
         Route::get('/testimonials/{testimonial}', [TestimonialController::class, 'show']); // Show a testimonial
-
-       
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
  
         //WEB ADMIN ROUTES
@@ -187,22 +183,24 @@ use Illuminate\Support\Facades\Route;
            Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-completed', [WithdrawalRequestController::class, 'markAsCompleted']);
 
         });
-            //AUTHOR ROUTES
-            Route::middleware(['auth:sanctum', 'check.author'])->group(function ()  {
-                Route::get('/author/dashboard', function () {
-                    return response()->json(['message' => 'Welcome Author! Your middleware is working.']);
-                });
 
 
-                //WITHDRAWAL REQUEST MANAGEMENT ROUTES
-                Route::get('/author/my-withdrawal-requests', [WithdrawalRequestController::class, 'authorRequests']); // 
-
-                //WITHDRAWAL REQUEST MANAGEMENT ROUTES
-                Route::post('/author/withdrawalRequests', [WithdrawalRequestController::class, 'store']); // Create a new withdrawal request
-            
-                //TOTAL ACCUMULATED MANAGEMENT ROUTES
-                Route::get('/author/totalAccumulatedRoyalty', [TotalAccumulatedRoyaltyController::class, 'index']); // get the totalAccumulatedRoyalty
+        //AUTHOR ROUTES
+        Route::middleware(['auth:sanctum', 'check.author'])->group(function ()  {
+            Route::get('/author/dashboard', function () {
+                return response()->json(['message' => 'Welcome Author! Your middleware is working.']);
             });
+
+
+            //WITHDRAWAL REQUEST MANAGEMENT ROUTES
+            Route::get('/author/my-withdrawal-requests', [WithdrawalRequestController::class, 'authorRequests']); // 
+
+            //WITHDRAWAL REQUEST MANAGEMENT ROUTES
+            Route::post('/author/withdrawalRequests', [WithdrawalRequestController::class, 'store']); // Create a new withdrawal request
+        
+            //TOTAL ACCUMULATED MANAGEMENT ROUTES
+            Route::get('/author/totalAccumulatedRoyalty', [TotalAccumulatedRoyaltyController::class, 'index']); // get the totalAccumulatedRoyalty
+        });
 
        
 

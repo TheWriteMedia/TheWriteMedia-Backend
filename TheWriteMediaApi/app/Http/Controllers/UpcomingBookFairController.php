@@ -31,25 +31,28 @@ class UpcomingBookFairController extends Controller
             'book_fair_title' => 'required|string|max:1000',
             'image_url' => 'required|string|max:1000',
             'logo_url' => 'required|string|max:1000',
-            'start_date' => 'required|date', // Validate start date
-            'end_date' => 'required|date|after_or_equal:start_date', // Validate end date
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'location' => 'required|string|max:1000',
-             'theme_color' => 'required|string|max:7',
+            'theme_color' => 'required|string|max:7',
             'summary' => 'required|string|max:1000',
+            'detailed_description' => 'required|string',
+            'services' => 'required|array',
+            'services.*.service_title' => 'required|string|max:255',
+            'services.*.table_data' => 'required|array',
+            'services.*.table_data.headers' => 'required|array',
+            'services.*.table_data.headers.*.name' => 'required|string',
+            'services.*.table_data.headers.*.price' => 'nullable|string',
+            'services.*.table_data.row_groups' => 'required|array',
+            'services.*.table_data.row_groups.*.category' => 'required|string',
+            'services.*.table_data.row_groups.*.rows' => 'required|array',
+            'services.*.table_data.row_groups.*.rows.*.row_name' => 'required|string',
+            'services.*.table_data.row_groups.*.rows.*.values' => 'required|array',
+            'services.*.table_data.row_groups.*.rows.*.values.*' => 'nullable|string',
         ]);
     
-        $upcomingbookfair = UpcomingBookFair::create([
-            'book_fair_title' => $request->book_fair_title,
-            'image_url' => $request->image_url,
-            'logo_url' => $request->logo_url,
-            'start_date' => $request->start_date, // Store start date
-            'end_date' => $request->end_date, // Store end date
-            'location' => $request->location,
-            'summary' => $request->summary,
-            'theme_color' => $request->theme_color,
-            'status' => 'ACTIVE', // Default status
-        ]);
-
+        $upcomingbookfair = UpcomingBookFair::create($request->all());
+    
         return response()->json($upcomingbookfair, 201);
     }
 
@@ -70,27 +73,40 @@ class UpcomingBookFairController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, UpcomingBookFair $upcomingBookFair)
-    {
-    // Validate only the fields provided in the request
-    $fields = $request->validate([
+{
+    // Validate the complete request payload (same as store)
+    $validated = $request->validate([
         'book_fair_title' => 'required|string|max:1000',
         'image_url' => 'required|string|max:1000',
         'logo_url' => 'required|string|max:1000',
-        'start_date' => 'required|date', // Validate start date
-        'end_date' => 'required|date|after_or_equal:start_date', // Validate end date
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after_or_equal:start_date',
         'location' => 'required|string|max:1000',
-        'summary' => 'required|string|max:1000',
         'theme_color' => 'required|string|max:7',
+        'summary' => 'required|string|max:1000',
+        'detailed_description' => 'required|string',
+        'services' => 'required|array',
+        'services.*.service_title' => 'required|string|max:255',
+        'services.*.table_data' => 'required|array',
+        'services.*.table_data.headers' => 'required|array',
+        'services.*.table_data.headers.*.name' => 'required|string',
+        'services.*.table_data.headers.*.price' => 'nullable|string',
+        'services.*.table_data.row_groups' => 'required|array',
+        'services.*.table_data.row_groups.*.category' => 'required|string',
+        'services.*.table_data.row_groups.*.rows' => 'required|array',
+        'services.*.table_data.row_groups.*.rows.*.row_name' => 'required|string',
+        'services.*.table_data.row_groups.*.rows.*.values' => 'required|array',
+        'services.*.table_data.row_groups.*.rows.*.values.*' => 'nullable|string',
     ]);
 
-     // Update book fair details
-     $upcomingBookFair->update($fields);
+    // Fully replace all data
+    $upcomingBookFair->update($validated);
 
     return response()->json([
-        'message' => 'Upcoming book fair updated successfully.',
-        'Upcoming Book Fair' => $upcomingBookFair
+        'message' => 'Book fair completely updated',
+        'data' => $upcomingBookFair->fresh()
     ], 200);
-    }
+}
 
     /**
      * Remove the specified resource from storage.

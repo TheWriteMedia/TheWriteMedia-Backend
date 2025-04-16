@@ -22,10 +22,18 @@ class UpcomingBookFair extends Model
         'end_date',
         'location',
         'summary',
+        'detailed_description', // Added field,
         'theme_color', 
+        'services', // Added field for services array
         'status',
    ];
 
+   
+   protected $casts = [
+    'services' => 'array', // Cast services to array
+        'start_date' => 'date',
+        'end_date' => 'date'
+];
 
    protected static function boot()
    {
