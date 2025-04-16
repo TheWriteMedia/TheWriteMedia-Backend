@@ -183,9 +183,6 @@ class AuthController extends Controller
                 ]
             ], 401); // Return HTTP 401 Unauthorized
         }
-    
-        // Revoke all existing tokens for the user
-        $user->tokens()->delete();
 
         $token = $user->createToken($user->user_name . ' Auth-Token')->plainTextToken;
     
@@ -195,10 +192,9 @@ class AuthController extends Controller
         ]);
     }
     public function logout(Request $request){
-       $request->user()->tokens()->delete();
-
-       return[
-        'message' => 'You are logged out.'
+        $request->user()->tokens()->where('id', $request->user()->currentAccessToken()->id)->delete();
+        return [
+            'message' => 'You are logged out.'
         ];
     }
     public function forgotPassword(Request $request): JsonResponse
