@@ -171,7 +171,9 @@ class AuthController extends Controller
     {
         $request->validate([
             'user_email' => 'required|email',
-            'user_password' => 'required'
+            'user_password' => 'required',
+            'fcm_token' => 'nullable|string', // Add validation for FCM token
+
         ]);
     
         $user = User::where('user_email', $request->user_email)->first();
@@ -184,6 +186,12 @@ class AuthController extends Controller
             ], 401); // Return HTTP 401 Unauthorized
         }
 
+         // Update FCM token if provided
+    if ($request->fcm_token) {
+        $user->push('fcm_tokens', $request->fcm_token, true); // true makes it unique
+        $user->save();
+    }
+
         $token = $user->createToken($user->user_name . ' Auth-Token')->plainTextToken;
     
         return response()->json([
@@ -192,10 +200,16 @@ class AuthController extends Controller
         ]);
     }
     public function logout(Request $request){
-        $request->user()->tokens()->where('id', $request->user()->currentAccessToken()->id)->delete();
-        return [
-            'message' => 'You are logged out.'
-        ];
+
+         // Clear FCM token
+    $user = $request->user();
+  
+
+       // Remove current device's FCM token if available
+       if ($request->fcm_token) {
+        $user->pull('fcm_tokens', $request->fcm_token);
+        $user->save();
+    }
     }
     public function forgotPassword(Request $request): JsonResponse
     {

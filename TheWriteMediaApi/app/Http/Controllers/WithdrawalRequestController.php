@@ -6,6 +6,7 @@ use App\Mail\WithdrawalStatusMail;
 use App\Models\TotalAccumulatedRoyalty;
 use App\Models\User;
 use App\Models\WithdrawalRequest;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -103,12 +104,39 @@ class WithdrawalRequestController extends Controller
         'value' => $totalRoyalty - $request->withdraw_value
     ]);
 
+       // Notify all web admins
+       $this->notifyAdminsAboutWithdrawalRequest($user, $withdrawal_request);
+
     return response()->json([
         'status' => 'success',
         'message' => 'Withdrawal request created successfully',
         'withdrawal_request' => $withdrawal_request,
         'remaining_balance' => $totalRoyalty - $request->withdraw_value
     ], 201);
+}
+
+/**
+ * Notify all web admins about a new withdrawal request
+ */
+// app/Http/Controllers/WithdrawalRequestController.php
+protected function notifyAdminsAboutWithdrawalRequest(User $author, WithdrawalRequest $withdrawalRequest)
+{
+    $admins = User::where('user_type', User::USER_TYPE_WEB_ADMIN)
+                 ->whereNotNull('fcm_token')
+                 ->get();
+
+    $title = 'New Withdrawal Request';
+    $message = "Author {$author->user_name} has requested a withdrawal of \${$withdrawalRequest->withdraw_value}";
+
+    foreach ($admins as $admin) {
+        NotificationService::sendNotification(
+            $admin->_id,
+            $title,
+            $message,
+            'withdrawal', // Notification type
+            $withdrawalRequest->id // Reference ID
+        );
+    }
 }
 
 public function cancel(WithdrawalRequest $withdrawalRequest)
@@ -137,6 +165,10 @@ public function cancel(WithdrawalRequest $withdrawalRequest)
 
     // Load the user relationship
     $withdrawalRequest->load('user');
+
+      // Notify the user
+      $this->notifyUserAboutWithdrawalStatus($withdrawalRequest, 'cancelled');
+
 
   // Send email
   Mail::to($withdrawalRequest->user->user_email)
@@ -170,6 +202,9 @@ public function markAsProcessing(WithdrawalRequest $withdrawalRequest)
       // In your controller methods, first load the relationship:
 $withdrawalRequest->load('user');
 
+   // Notify the user
+   $this->notifyUserAboutWithdrawalStatus($withdrawalRequest, 'processing');
+
       // Send email
       Mail::to($withdrawalRequest->user->user_email)
       ->send(new WithdrawalStatusMail($withdrawalRequest, 'processing', $withdrawalRequest->user));
@@ -199,6 +234,9 @@ public function markAsMailed(WithdrawalRequest $withdrawalRequest)
     ]);
       // In your controller methods, first load the relationship:
 $withdrawalRequest->load('user');
+
+ // Notify the user
+ $this->notifyUserAboutWithdrawalStatus($withdrawalRequest, 'mailed');
 
       // Send email
       Mail::to($withdrawalRequest->user->user_email)
@@ -232,6 +270,10 @@ public function markAsCompleted(WithdrawalRequest $withdrawalRequest)
 
       // In your controller methods, first load the relationship:
 $withdrawalRequest->load('user');
+
+ // Notify the user
+ $this->notifyUserAboutWithdrawalStatus($withdrawalRequest, 'completed');
+
      // Send email
      Mail::to($withdrawalRequest->user->user_email)
      ->send(new WithdrawalStatusMail($withdrawalRequest, 'completed', $withdrawalRequest->user));
@@ -241,6 +283,47 @@ $withdrawalRequest->load('user');
         'message' => 'Withdrawal request marked as completed',
         'withdrawal_request' => $withdrawalRequest
     ], 200);
+}
+
+/**
+ * Notify user about withdrawal status changes
+ */
+protected function notifyUserAboutWithdrawalStatus(WithdrawalRequest $withdrawalRequest, $action)
+{
+    $user = $withdrawalRequest->user;
+    
+    if (!$user || empty($user->fcm_token)) {
+        return;
+    }
+
+    $statusMessages = [
+        'processing' => [
+            'title' => 'Withdrawal Processing',
+            'message' => "Your withdrawal of \${$withdrawalRequest->withdraw_value} is being processed"
+        ],
+        'mailed' => [
+            'title' => 'Withdrawal Mailed',
+            'message' => "Your withdrawal of \${$withdrawalRequest->withdraw_value} has been mailed"
+        ],
+        'completed' => [
+            'title' => 'Withdrawal Completed',
+            'message' => "Your withdrawal of \${$withdrawalRequest->withdraw_value} has been completed"
+        ],
+        'cancelled' => [
+            'title' => 'Withdrawal Cancelled',
+            'message' => "Your withdrawal of \${$withdrawalRequest->withdraw_value} has been cancelled"
+        ]
+    ];
+
+    if (isset($statusMessages[$action])) {
+        NotificationService::sendNotification(
+            $user->_id,
+            $statusMessages[$action]['title'],
+            $statusMessages[$action]['message'],
+            'withdrawal_status',
+            $withdrawalRequest->id
+        );
+    }
 }
 
     /**

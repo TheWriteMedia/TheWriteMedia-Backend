@@ -29,6 +29,7 @@ class User extends Model
         'user_password',
         'user_type',
         'user_profile',
+        'fcm_tokens',
         'status'
     ];
 
