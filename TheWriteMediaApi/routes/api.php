@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\AuthorReviewsController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
@@ -40,6 +41,9 @@ use Illuminate\Support\Facades\Route;
         Route::post('/create-checkout-session', [PaymentController::class, 'createCheckoutSession']);
         Route::get('/checkout/success', [PaymentController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel', [PaymentController::class, 'cancel'])->name('checkout.cancel');
+       
+       
+       
         //GLOBAL ROUTES (CAN BE USE BY ADMINS AND AUTHORS)
         //ENTRY POINT
         Route::post('/register', [AuthController::class, 'register']);
@@ -53,6 +57,13 @@ use Illuminate\Support\Facades\Route;
         //PRESENT ALL BOOKS
         Route::get('/books', [BookController::class, 'index']);
         Route::get('/books/search', [BookController::class, 'search']);
+        
+        //NOTIFICATIONS ROUTES
+        Route::middleware(['auth:sanctum'])->get('/notifications', [NotificationController::class, 'index']);
+        Route::middleware(['auth:sanctum'])->post('/notifications/{notificationId}/mark-as-read', [NotificationController::class, 'markAsRead']);
+        Route::middleware(['auth:sanctum'])->post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+
+
 
         //PRESENT SPECIFIC BOOK
         Route::get('/books/{book}', [BookController::class, 'show']); 
