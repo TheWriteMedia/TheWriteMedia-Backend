@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class WithdrawalRequest extends Model
 {
     /** @use HasFactory<\Database\Factories\TotalAccumulatedRoyaltyFactory> */
-    use HasFactory;
+    use HasFactory,Notifiable;
 
     
     protected $connection = 'mongodb';  

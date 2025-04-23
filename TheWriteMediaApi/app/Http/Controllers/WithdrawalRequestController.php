@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WithdrawalStatusMail;
 use App\Models\TotalAccumulatedRoyalty;
 use App\Models\User;
 use App\Models\WithdrawalRequest;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 class WithdrawalRequestController extends Controller
 {
 
@@ -109,9 +111,6 @@ class WithdrawalRequestController extends Controller
     ], 201);
 }
 
-/**
- * Cancel a withdrawal request and restore the royalty balance.
- */
 public function cancel(WithdrawalRequest $withdrawalRequest)
 {
     // Only allow cancellation if status is PENDING or PROCESSING
@@ -135,6 +134,13 @@ public function cancel(WithdrawalRequest $withdrawalRequest)
     TotalAccumulatedRoyalty::where('user_id', $withdrawalRequest->user_id)->update([
         'value' => $totalRoyalty + $withdrawalRequest->withdraw_value
     ]);
+
+    // Load the user relationship
+    $withdrawalRequest->load('user');
+
+  // Send email
+  Mail::to($withdrawalRequest->user->user_email)
+  ->send(new WithdrawalStatusMail($withdrawalRequest, 'cancelled', $withdrawalRequest->user));
 
     return response()->json([
         'status' => 'success',
@@ -161,6 +167,13 @@ public function markAsProcessing(WithdrawalRequest $withdrawalRequest)
         'status' => 'PROCESSING'
     ]);
 
+      // In your controller methods, first load the relationship:
+$withdrawalRequest->load('user');
+
+      // Send email
+      Mail::to($withdrawalRequest->user->user_email)
+      ->send(new WithdrawalStatusMail($withdrawalRequest, 'processing', $withdrawalRequest->user));
+
     return response()->json([
         'status' => 'success',
         'message' => 'Withdrawal request marked as processing',
@@ -184,6 +197,12 @@ public function markAsMailed(WithdrawalRequest $withdrawalRequest)
     $withdrawalRequest->update([
         'status' => 'MAILED'
     ]);
+      // In your controller methods, first load the relationship:
+$withdrawalRequest->load('user');
+
+      // Send email
+      Mail::to($withdrawalRequest->user->user_email)
+      ->send(new WithdrawalStatusMail($withdrawalRequest, 'mailed', $withdrawalRequest->user));
 
     return response()->json([
         'status' => 'success',
@@ -210,6 +229,12 @@ public function markAsCompleted(WithdrawalRequest $withdrawalRequest)
         'status' => 'COMPLETED',
         'date_received' => now() // Set current date/time
     ]);
+
+      // In your controller methods, first load the relationship:
+$withdrawalRequest->load('user');
+     // Send email
+     Mail::to($withdrawalRequest->user->user_email)
+     ->send(new WithdrawalStatusMail($withdrawalRequest, 'completed', $withdrawalRequest->user));
 
     return response()->json([
         'status' => 'success',

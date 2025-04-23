@@ -25,12 +25,14 @@ class UpcomingBookFair extends Model
         'detailed_description', // Added field,
         'theme_color', 
         'services', // Added field for services array
+        'compiled_images_url', // Add this line
         'status',
    ];
 
    
    protected $casts = [
     'services' => 'array', // Cast services to array
+    'compiled_images_url' => 'array', // Add this cast
         'start_date' => 'date',
         'end_date' => 'date'
 ];

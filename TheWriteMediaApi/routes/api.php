@@ -15,7 +15,6 @@ use App\Http\Controllers\TotalAccumulatedRoyaltyController;
 use App\Http\Controllers\UpcomingBookFairController;
 use App\Http\Controllers\WithdrawalRequestController;
 use App\Mail\ContactUsMail;
-use App\Models\TotalAccumulatedRoyalty;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -181,6 +180,7 @@ use Illuminate\Support\Facades\Route;
            Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-processing', [WithdrawalRequestController::class, 'markAsProcessing']);
            Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-mailed', [WithdrawalRequestController::class, 'markAsMailed']);
            Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-completed', [WithdrawalRequestController::class, 'markAsCompleted']);
+
 
         });
 
