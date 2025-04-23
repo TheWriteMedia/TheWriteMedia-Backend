@@ -6,7 +6,9 @@ use App\Models\Book;
 use App\Models\Report;
 use App\Models\TotalAccumulatedRoyalty;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ReportController extends Controller
@@ -35,7 +37,7 @@ class ReportController extends Controller
 }
 
 
-    /**
+/**
  * Store a newly created resource in storage.
  */
 public function store(Request $request)
@@ -140,6 +142,8 @@ public function store(Request $request)
             ]);
         }
             
+          // After creating the report and updating royalties:
+          $this->notifyAuthorAboutReport($authorId, $book, $totalRoyalty, $quarter, $year);
 
         return response()->json([
             'status' => 'success',
@@ -155,38 +159,65 @@ public function store(Request $request)
     }
 }
 
-
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        try {
-            // Find the report by ID
-            $report = Report::with(['author', 'book'])->find($id);
+/**
+ * Notify author about new sales report
+ */
+protected function notifyAuthorAboutReport($authorId, Book $book, $totalRoyalty, $quarter, $year)
+{
+    $author = User::find($authorId);
     
-            if (!$report) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Report not found.',
-                ], 404);
-            }
-    
-            return response()->json([
-                'status' => 'success',
-                'report' => $report
-            ], 200);
-        } catch (\Exception $e) {
+    if (!$author || empty($author->fcm_tokens)) {
+        Log::warning('Report notification failed: Author not found or has no FCM tokens', [
+            'author_id' => $authorId,
+            'book_id' => $book->id,
+            'has_tokens' => !empty($author->fcm_tokens) // Log whether tokens exist
+        ]);
+        return;
+    }
+
+    $title = 'New Sales Report Available';
+    $message = "Your book '{$book->book_title}' earned \${$totalRoyalty} in Q{$quarter} {$year}";
+
+    NotificationService::sendNotification(
+        $author->id,
+        $title,
+        $message,
+        'sales_report',
+        $book->id
+    );
+}
+
+
+
+/**
+ * Display the specified resource.
+ */
+public function show($id)
+{
+    try {
+        // Find the report by ID
+        $report = Report::with(['author', 'book'])->find($id);
+
+        if (!$report) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to retrieve the sales report',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'Report not found.',
+            ], 404);
         }
+
+        return response()->json([
+            'status' => 'success',
+            'report' => $report
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to retrieve the sales report',
+            'error' => $e->getMessage(),
+        ], 500);
     }
-    
+}
+
 
 /**
  * Update the specified resource in storage.
@@ -334,7 +365,7 @@ public function update(Request $request, $id)
 }
 
 
-    /**
+/**
  * Remove the specified resource from storage.
  */
 public function destroy(Report $report)

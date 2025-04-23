@@ -41,40 +41,57 @@ class NotificationService
         return $messaging;
     }
 
-    // Update NotificationService (app/Services/NotificationService.php):
-// app/Services/NotificationService.php
-public static function sendNotification($userId, $title, $message, $type = null, $referenceId = null)
-{
-    $user = User::find($userId);
 
-    if (!$user || empty($user->fcm_tokens)) {
-        return false;
-    }
-
-    // Save notification in DB
-    NotificationModel::create([
-        'user_id' => $userId,
-        'title' => $title,
-        'message' => $message,
-        'type' => $type,
-        'reference_id' => $referenceId,
-        'is_read' => false,
-    ]);
-
-    try {
-        $notification = Notification::create($title, $message);
-        
-        foreach ($user->fcm_tokens as $token) {
-            $message = CloudMessage::withTarget('token', $token)
-                ->withNotification($notification);
-            
-            self::getMessaging()->send($message);
+    public static function sendNotification($userId, $title, $message, $type = null, $referenceId = null)
+    {
+        $user = User::find($userId);
+    
+        if (!$user) {
+            Log::warning("User not found for notification", ['user_id' => $userId]);
+            return false;
         }
-        
+    
+        // Save notification in DB regardless of FCM tokens
+        $notification = NotificationModel::create([
+            'user_id' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+            'reference_id' => $referenceId,
+            'is_read' => false,
+        ]);
+    
+        // Check if user has any FCM tokens
+        if (!empty($user->fcm_tokens) && is_array($user->fcm_tokens)) {
+            try {
+                $firebaseNotification = Notification::create($title, $message);
+                
+                foreach ($user->fcm_tokens as $token) {
+                    if (!empty($token)) { // Skip empty tokens
+                        $message = CloudMessage::withTarget('token', $token)
+                            ->withNotification($firebaseNotification);
+                        
+                        self::getMessaging()->send($message);
+                    }
+                }
+                
+                Log::info('FCM notification sent successfully', [
+                    'user_id' => $userId,
+                    'tokens_count' => count($user->fcm_tokens),
+                    'notification_id' => $notification->id
+                ]);
+                
+            } catch (\Exception $e) {
+                Log::error('FCM Error: ' . $e->getMessage(), [
+                    'user_id' => $userId,
+                    'notification_id' => $notification->id,
+                    'error_trace' => $e->getTraceAsString()
+                ]);
+            }
+        } else {
+            Log::warning('User has no FCM tokens', ['user_id' => $userId]);
+        }
+    
         return true;
-    } catch (\Exception $e) {
-        Log::error('FCM Error: ' . $e->getMessage());
-        return false;
     }
-}
 }
