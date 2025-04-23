@@ -118,11 +118,12 @@ class WithdrawalRequestController extends Controller
 /**
  * Notify all web admins about a new withdrawal request
  */
-// app/Http/Controllers/WithdrawalRequestController.php
+
 protected function notifyAdminsAboutWithdrawalRequest(User $author, WithdrawalRequest $withdrawalRequest)
 {
     $admins = User::where('user_type', User::USER_TYPE_WEB_ADMIN)
-                 ->whereNotNull('fcm_token')
+                 ->where('fcm_tokens', 'exists', true)  // Check if array exists
+                 ->where('fcm_tokens', 'not', [])       // Check array is not empty
                  ->get();
 
     $title = 'New Withdrawal Request';
@@ -136,9 +137,14 @@ protected function notifyAdminsAboutWithdrawalRequest(User $author, WithdrawalRe
             'withdrawal', // Notification type
             $withdrawalRequest->id // Reference ID
         );
+        
+        Log::info('Admin notified about withdrawal request', [
+            'admin_id' => $admin->_id,
+            'withdrawal_id' => $withdrawalRequest->id,
+            'fcm_tokens_count' => count($admin->fcm_tokens)
+        ]);
     }
 }
-
 public function cancel(WithdrawalRequest $withdrawalRequest)
 {
     // Only allow cancellation if status is PENDING or PROCESSING
@@ -167,7 +173,7 @@ public function cancel(WithdrawalRequest $withdrawalRequest)
     $withdrawalRequest->load('user');
 
       // Notify the user
-      $this->notifyUserAboutWithdrawalStatus($withdrawalRequest, 'cancelled');
+      $this->notifyUserAboutWithdrawalStatus($withdrawalRequest, 'cancelled'); // or appropriate action
 
 
   // Send email
@@ -288,12 +294,32 @@ $withdrawalRequest->load('user');
 /**
  * Notify user about withdrawal status changes
  */
-protected function notifyUserAboutWithdrawalStatus(WithdrawalRequest $withdrawalRequest, $action)
+protected function notifyUserAboutWithdrawalStatus(WithdrawalRequest $withdrawalRequest, string $action): void
 {
+    // Ensure user relationship is loaded
+    $withdrawalRequest->load('user');
     $user = $withdrawalRequest->user;
     
-    if (!$user || empty($user->fcm_token)) {
+    if (!$user) {
+        Log::warning('Withdrawal status notification failed: User not found', [
+            'withdrawal_request_id' => $withdrawalRequest->id,
+            'action' => $action,
+            'user_id' => $withdrawalRequest->user_id
+        ]);
         return;
+    }
+
+    // Check if user has any valid FCM tokens
+    if (empty($user->fcm_tokens) || !is_array($user->fcm_tokens)) {
+        Log::warning('Withdrawal status notification failed: User has no FCM tokens', [
+            'user_id' => $user->id,
+            'withdrawal_request_id' => $withdrawalRequest->id,
+            'action' => $action,
+            'fcm_tokens' => $user->fcm_tokens ?? null
+        ]);
+        
+        // Still create the notification in database even without FCM tokens
+        // This allows user to see it when they log in
     }
 
     $statusMessages = [
@@ -315,17 +341,46 @@ protected function notifyUserAboutWithdrawalStatus(WithdrawalRequest $withdrawal
         ]
     ];
 
-    if (isset($statusMessages[$action])) {
-        NotificationService::sendNotification(
-            $user->_id,
+    if (!isset($statusMessages[$action])) {
+        Log::error('Invalid withdrawal status action', [
+            'user_id' => $user->id,
+            'withdrawal_request_id' => $withdrawalRequest->id,
+            'action' => $action,
+            'valid_actions' => array_keys($statusMessages)
+        ]);
+        return;
+    }
+
+    Log::info('Sending withdrawal status notification', [
+        'user_id' => $user->id,
+        'withdrawal_request_id' => $withdrawalRequest->id,
+        'action' => $action,
+        'has_fcm_tokens' => !empty($user->fcm_tokens)
+    ]);
+
+    try {
+        $success = NotificationService::sendNotification(
+            $user->id,
             $statusMessages[$action]['title'],
             $statusMessages[$action]['message'],
             'withdrawal_status',
             $withdrawalRequest->id
         );
+
+        if (!$success) {
+            Log::error('NotificationService returned failure', [
+                'user_id' => $user->id,
+                'notification_data' => $statusMessages[$action]
+            ]);
+        }
+    } catch (\Exception $e) {
+        Log::error('Failed to send withdrawal status notification', [
+            'user_id' => $user->id,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
     }
 }
-
     /**
      * Display the specified resource.
      */
