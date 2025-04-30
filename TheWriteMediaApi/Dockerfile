@@ -31,7 +31,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Install Laravel dependencies with memory limit
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=ext-mongodb
 
 # Set the proper permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
