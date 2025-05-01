@@ -23,6 +23,19 @@ use Illuminate\Support\Facades\Route;
     Route::middleware(['cors'])->group(function () {
 
 
+        Route::get('/test-smtp', function() {
+            try {
+                Mail::raw('This is a test email from Laravel SMTP', function($message) {
+                    $message->to('milessabal123@gmail.com') // Replace with your email
+                            ->subject('SMTP Test Email');
+                });
+                return 'Email sent successfully! Check your inbox (and spam folder).';
+            } catch (\Exception $e) {
+                return 'Error: ' . $e->getMessage();
+            }
+        });
+
+
         Route::post('/contact', function (Request $request) {
             $request->validate([
                 'name' => 'required|string',
