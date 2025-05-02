@@ -119,32 +119,48 @@ class WithdrawalRequestController extends Controller
  * Notify all web admins about a new withdrawal request
  */
 
-protected function notifyAdminsAboutWithdrawalRequest(User $author, WithdrawalRequest $withdrawalRequest)
-{
-    $admins = User::where('user_type', User::USER_TYPE_WEB_ADMIN)
-                 ->where('fcm_tokens', 'exists', true)  // Check if array exists
-                 ->where('fcm_tokens', 'not', [])       // Check array is not empty
-                 ->get();
-
-    $title = 'New Withdrawal Request';
-    $message = "Author {$author->user_name} has requested a withdrawal of \${$withdrawalRequest->withdraw_value}";
-
-    foreach ($admins as $admin) {
-        NotificationService::sendNotification(
-            $admin->_id,
-            $title,
-            $message,
-            'withdrawal', // Notification type
-            $withdrawalRequest->id // Reference ID
-        );
-        
-        Log::info('Admin notified about withdrawal request', [
-            'admin_id' => $admin->_id,
-            'withdrawal_id' => $withdrawalRequest->id,
-            'fcm_tokens_count' => count($admin->fcm_tokens)
-        ]);
-    }
-}
+ protected function notifyAdminsAboutWithdrawalRequest(User $author, WithdrawalRequest $withdrawalRequest)
+ {
+     $admins = User::where('user_type', User::USER_TYPE_WEB_ADMIN)
+                  ->whereNotNull('fcm_tokens')  // More reliable check for MongoDB
+                  ->get();
+ 
+     $title = 'New Withdrawal Request';
+     $message = "Author {$author->user_name} has requested a withdrawal of \${$withdrawalRequest->withdraw_value}";
+ 
+     foreach ($admins as $admin) {
+         // Skip if no FCM tokens
+         if (empty($admin->fcm_tokens) || !is_array($admin->fcm_tokens)) {
+             Log::warning('Admin has no FCM tokens', [
+                 'admin_id' => $admin->_id,
+                 'fcm_tokens' => $admin->fcm_tokens
+             ]);
+             continue;
+         }
+ 
+         try {
+             $success = NotificationService::sendNotification(
+                 $admin->_id,
+                 $title,
+                 $message,
+                 'withdrawal',
+                 $withdrawalRequest->id
+             );
+             
+             Log::info('Admin notification attempt', [
+                 'admin_id' => $admin->_id,
+                 'withdrawal_id' => $withdrawalRequest->id,
+                 'fcm_tokens' => $admin->fcm_tokens,
+                 'success' => $success
+             ]);
+         } catch (\Exception $e) {
+             Log::error('Failed to notify admin', [
+                 'admin_id' => $admin->_id,
+                 'error' => $e->getMessage()
+             ]);
+         }
+     }
+ }
 public function cancel(WithdrawalRequest $withdrawalRequest)
 {
     // Only allow cancellation if status is PENDING or PROCESSING

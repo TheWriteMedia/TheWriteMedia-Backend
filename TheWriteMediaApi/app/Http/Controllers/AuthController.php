@@ -43,48 +43,38 @@ class AuthController extends Controller
         try {
             $user = $request->user();
     
-            // Ensure that password updates require the current password
-            if ($request->has('user_password') && !$request->filled('current_password')) {
-                return response()->json([
-                    'message' => 'Password change is only allowed through the current password, new password, and confirm password fields.'
-                ], 400);
-            }
     
-            // Define validation rules based on user role
-            $validationRules = [
-                'user_name' => 'required|string|max:255',
-                'user_email' => 'required|string|email|max:255|unique:users,user_email,' . $user->id,
-                'current_password' => 'nullable|string',
-                'new_password' => ['nullable', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
-                'user_profile' => 'required|string'
-            ];
+           // Define validation rules based on user role
+           $validationRules = [
+            'user_name' => 'required|string|max:255',
+            'user_email' => 'required|string|email|max:255|unique:users,user_email,' . $user->id,
+            'current_password' => 'required_with:new_password|string',
+            'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'new_password_confirmation' => ['required_with:new_password', 'string', 'min:8'],
+            'user_profile' => 'required|string'
+        ];
+        if ($user->user_type === 'author') {
+            $validationRules = array_merge($validationRules, [
+                'author_country' => 'required|string|max:255',
+                'author_age' => 'required|integer',
+                'author_sex' => 'required|string|max:10',
+            ]);
+        }
     
-            if ($user->user_type === 'author') {
-                // Additional validation for authors
-                $validationRules = array_merge($validationRules, [
-                    'author_country' => 'required|string|max:255',
-                    'author_age' => 'required|integer',
-                    'author_sex' => 'required|string|max:10',
-                ]);
-            }
+        $validated = $request->validate($validationRules);
     
-            // Validate request
-            $validated = $request->validate($validationRules);
-    
-            // If the user is changing the password, validate the current password
-            if ($request->filled('current_password')) {
+               // Password change logic
+            if ($request->filled('new_password')) {
                 if (!Hash::check($validated['current_password'], $user->user_password)) {
                     return response()->json([
                         'message' => 'Current password is incorrect.'
                     ], 400);
                 }
-    
-                // Update the password if provided and valid
+
                 $user->update([
                     'user_password' => Hash::make($validated['new_password']),
                 ]);
             }
-    
             // Update the user data (name, email, profile)
             $user->update([
                 'user_name' => $validated['user_name'],

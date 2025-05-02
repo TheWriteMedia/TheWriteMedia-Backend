@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\AuthorReviewsController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\NewsBannerController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
@@ -123,6 +124,8 @@ use Illuminate\Support\Facades\Route;
         Route::get('/testimonials', [TestimonialController::class, 'index']); // get all testimonials
         Route::get('/testimonials/{testimonial}', [TestimonialController::class, 'show']); // Show a testimonial
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
+
+        Route::get('/banners', [NewsBannerController::class, 'index']); // get all banners
  
         //WEB ADMIN ROUTES
         Route::middleware(['auth:sanctum', 'check.web.admin'])->group(function ()  {
@@ -188,6 +191,12 @@ use Illuminate\Support\Facades\Route;
            Route::post('/admin/testimonials', [TestimonialController::class, 'store']); // Create a new testimonial
            Route::put('/admin/testimonials/{testimonial}', [TestimonialController::class, 'update']); // update a testimonial
            Route::delete('/admin/testimonials/{testimonial}', [TestimonialController::class, 'destroy']); // Delete a testimonial
+
+           
+           //BANNER MANAGEMENT ROUTES
+           Route::post('/admin/banners', [NewsBannerController::class, 'store']); // Create a new banner
+           Route::put('/admin/banners/{banner}', [NewsBannerController::class, 'update']); // update a banner
+           Route::delete('/admin/banners/{banner}', [NewsBannerController::class, 'destroy']); // Delete a banner
 
 
            //ADDONS MANAGEMENT ROUTES
