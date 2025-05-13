@@ -8,6 +8,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\NewsBannerController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
@@ -126,6 +127,9 @@ use Illuminate\Support\Facades\Route;
         Route::post('/delete-image', [AuthController::class, 'deleteImage']); // when replacing a new image for the author
 
         Route::get('/banners', [NewsBannerController::class, 'index']); // get all banners
+
+        Route::post('/orders', action: [OrderController::class, 'store']); // Order
+
  
         //WEB ADMIN ROUTES
         Route::middleware(['auth:sanctum', 'check.web.admin'])->group(function ()  {
@@ -214,6 +218,10 @@ use Illuminate\Support\Facades\Route;
            Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-mailed', [WithdrawalRequestController::class, 'markAsMailed']);
            Route::patch('/admin/withdrawal-requests/{withdrawalRequest}/mark-as-completed', [WithdrawalRequestController::class, 'markAsCompleted']);
 
+           //ORDERS ROUTES
+           Route::get('/admin/orders', [OrderController::class, 'index']);
+           Route::put('/admin/orders/{order}', [OrderController::class, 'update']);
+           Route::delete('/admin/orders/{order}', [OrderController::class, 'destroy']);
 
         });
 

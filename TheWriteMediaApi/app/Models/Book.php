@@ -24,11 +24,13 @@ class Book extends Model
        'paperback_price_increase',
        'paperback_srp',
        'paperback_price',
+       'paperback_print_cost',
        'paperback_isbn',
        
        'hardback_price_increase',
        'hardback_srp',
        'hardback_price',
+       'hardback_print_cost',
        'hardback_isbn',
 
        'ebook_price_increase',
@@ -51,10 +53,13 @@ class Book extends Model
    protected $casts = [
     'paperback_price_increase' => 'double',
     'paperback_srp' => 'double',
+    'paperback_print_cost' => 'double',
     'paperback_price' => 'double',
+   
     
     'hardback_price_increase' => 'double',
     'hardback_srp' => 'double',
+    'hardback_print_cost' => 'double',
     'hardback_price' => 'double',
 
     'ebook_price_increase' => 'double',

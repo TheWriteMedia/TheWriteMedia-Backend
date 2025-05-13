@@ -110,11 +110,13 @@ class BookController extends Controller
             'paperback_price_increase' => 'nullable|numeric',
             'paperback_srp' => 'nullable|numeric',
             'paperback_price' => 'nullable|numeric',
+            'paperback_print_cost' => 'nullable|numeric',
             'paperback_isbn' => 'nullable|string|max:255',
 
             'hardback_price_increase' => 'nullable|numeric',
             'hardback_srp' => 'nullable|numeric',
             'hardback_price' => 'nullable|numeric',
+            'hardback_print_cost' => 'nullable|numeric',
             'hardback_isbn' => 'nullable|string|max:255',
 
             'ebook_price_increase' => 'nullable|numeric',
@@ -144,11 +146,13 @@ class BookController extends Controller
             'paperback_price_increase' => number_format((float)$request->paperback_price_increase, 2, '.', ''),
             'paperback_srp' => number_format((float)$request->paperback_srp, 2, '.', ''),
             'paperback_price' => number_format((float)$request->paperback_price, 2, '.', ''),
+            'paperback_print_cost' => number_format((float)$request->paperback_print_cost, 2, '.', ''),
             'paperback_isbn' => $request->paperback_isbn,
 
             'hardback_price_increase' => number_format((float)$request->hardback_price_increase, 2, '.', ''),
             'hardback_srp' => number_format((float)$request->hardback_srp, 2, '.', ''),
             'hardback_price' => number_format((float)$request->hardback_price, 2, '.', ''),
+            'hardback_print_cost' => number_format((float)$request->hardback_print_cost, 2, '.', ''),
             'hardback_isbn' => $request->hardback_isbn,
 
             'ebook_price_increase' => number_format((float)$request->ebook_price_increase, 2, '.', ''),
@@ -211,11 +215,13 @@ class BookController extends Controller
         'paperback_price_increase' => 'nullable|numeric',
         'paperback_srp' => 'nullable|numeric',
         'paperback_price' => 'nullable|numeric',
+        'paperback_print_cost' => 'nullable|numeric',
         'paperback_isbn' => 'nullable|string|max:255',
 
         'hardback_price_increase' => 'nullable|numeric',
         'hardback_srp' => 'nullable|numeric',
         'hardback_price' => 'nullable|numeric',
+        'hardback_print_cost' => 'nullable|numeric',
         'hardback_isbn' => 'nullable|string|max:255',
 
         'ebook_price_increase' => 'nullable|numeric',
@@ -246,11 +252,13 @@ class BookController extends Controller
         'paperback_price_increase' => number_format((float)$fields['paperback_price_increase'], 2, '.', ''),
         'paperback_srp' => number_format((float)$fields['paperback_srp'], 2, '.', ''),
         'paperback_price' => number_format((float)$fields['paperback_price'], 2, '.', ''),
+        'paperback_print_cost' => number_format((float)$fields['paperback_print_cost'], 2, '.', ''),
         'paperback_isbn' => $fields['paperback_isbn'],
 
         'hardback_price_increase' => number_format((float)$fields['hardback_price_increase'], 2, '.', ''),
         'hardback_srp' => number_format((float)$fields['hardback_srp'], 2, '.', ''),
         'hardback_price' => number_format((float)$fields['hardback_price'], 2, '.', ''),
+        'hardback_print_cost' => number_format((float)$fields['hardback_print_cost'], 2, '.', ''),
         'hardback_isbn' => $fields['hardback_isbn'],
 
         'ebook_price_increase' => number_format((float)$fields['ebook_price_increase'], 2, '.', ''),

@@ -17,6 +17,7 @@ class Author extends Model
         'user_id',
         'unique_author_id',
         'author_name',
+        'author_pen_name',
         'author_country',
         'author_sex',
         'author_age',
