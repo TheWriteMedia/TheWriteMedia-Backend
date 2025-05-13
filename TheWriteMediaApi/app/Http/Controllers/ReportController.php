@@ -85,14 +85,30 @@ public function store(Request $request)
             $format = strtolower($data['book_format']);
             $booksSold = $data['number_of_book_sold'];
             $country = $data['country'];
+            
+             // Get pricing components based on format
+             $srp = match ($format) {
+                'paperback' => $book->paperback_srp,
+                'hardback' => $book->hardback_srp,
+                'ebook' => $book->ebook_srp,
+                default => 0,
+            };
 
             // Determine price increase based on format
             $priceIncrease = match ($format) {
                 'paperback' => $book->paperback_price_increase,
                 'hardback' => $book->hardback_price_increase,
                 'ebook' => $book->ebook_price_increase,
-                default => null,
+                default => 0,
             };
+
+            $printCost = match ($format) {
+                'paperback' => $book->paperback_print_cost,
+                'hardback' => $book->hardback_print_cost,
+                'ebook' => 0, // Ebooks have no print cost
+                default => 0,
+            };
+
 
             if ($priceIncrease === null) {
                 return response()->json([
@@ -101,21 +117,26 @@ public function store(Request $request)
                 ], 422);
             }
 
-            // Calculate royalty per book and total royalty
-            $royaltyPerBook = round(($priceIncrease * 0.80) + 2.3, 2);
-            $totalRoyaltyForSale = round($royaltyPerBook * $booksSold, 2);
-            $totalRoyalty += $totalRoyaltyForSale;
+               // Calculate royalty per book: (SRP + Price Increase - Print Cost) * royalty rate
+               $baseRoyalty = ($srp + $priceIncrease - $printCost);
+               $royaltyPerBook = round($baseRoyalty, 2); // Assuming 80% royalty rate
+               $totalRoyaltyForSale = round($royaltyPerBook * $booksSold, 2);
+               $totalRoyalty += $totalRoyaltyForSale;
 
-            // Append entry to sales data
-            $formattedSalesData[] = [
+               $formattedSalesData[] = [
                 'book_format' => $format,
                 'number_of_book_sold' => $booksSold,
                 'country' => $country,
                 'royalty_per_book' => $royaltyPerBook,
-                'total_royalty' => number_format($totalRoyaltyForSale, 2)
+                'total_royalty' => number_format($totalRoyaltyForSale, 2),
+                'calculation_breakdown' => [
+                    'srp' => $srp,
+                    'price_increase' => $priceIncrease,
+                    'print_cost' => $printCost,
+                    'base_royalty' => $baseRoyalty,
+                ]
             ];
         }
-
         // Ensure total royalty is also rounded
         $totalRoyalty = round($totalRoyalty, 2);
 
@@ -142,8 +163,12 @@ public function store(Request $request)
             ]);
         }
             
-          // After creating the report and updating royalties:
-          $this->notifyAuthorAboutReport($authorId, $book, $totalRoyalty, $quarter, $year);
+         // Notify author (but don't let it fail the request)
+        try {
+            $this->notifyAuthorAboutReport($authorId, $book, $totalRoyalty, $quarter, $year);
+        } catch (\Exception $e) {
+            Log::error('Failed to send notification: '.$e->getMessage());
+        }
 
         return response()->json([
             'status' => 'success',
@@ -280,12 +305,20 @@ public function update(Request $request, $id)
                 $booksSold = $data['number_of_book_sold'];
                 $country = $data['country'];
 
+                   // Get pricing components based on format
+                   $srp = match ($format) {
+                    'paperback' => $book->paperback_srp,
+                    'hardback' => $book->hardback_srp,
+                    'ebook' => $book->ebook_srp,
+                    default => 0,
+                };
+
                 // Determine price increase based on format
                 $priceIncrease = match ($format) {
                     'paperback' => $book->paperback_price_increase,
                     'hardback' => $book->hardback_price_increase,
                     'ebook' => $book->ebook_price_increase,
-                    default => null,
+                    default => 0,
                 };
 
                 if ($priceIncrease === null) {
@@ -295,18 +328,33 @@ public function update(Request $request, $id)
                     ], 422);
                 }
 
+                $printCost = match ($format) {
+                    'paperback' => $book->paperback_print_cost,
+                    'hardback' => $book->hardback_print_cost,
+                    'ebook' => 0, // Ebooks have no print cost
+                    default => 0,
+                };
+
                 // Calculate royalty per book
-                $royaltyPerBook = round(($priceIncrease * 0.80) + 2.3, 2);
+              
+                $baseRoyalty = ($srp + $priceIncrease - $printCost);
+                $royaltyPerBook = round($baseRoyalty, 2); 
                 $totalRoyaltyForSale = round($royaltyPerBook * $booksSold, 2);
                 $totalRoyalty += $totalRoyaltyForSale;
 
-                // Append new sales data
-                $processedSalesData[] = [
+                  // Append new sales data with detailed breakdown
+                  $processedSalesData[] = [
                     'book_format' => $format,
                     'number_of_book_sold' => $booksSold,
                     'country' => $country,
                     'royalty_per_book' => $royaltyPerBook,
                     'total_royalty' => $totalRoyaltyForSale,
+                    'calculation_breakdown' => [
+                        'srp' => $srp,
+                        'price_increase' => $priceIncrease,
+                        'print_cost' => $printCost,
+                        'base_royalty' => $baseRoyalty,
+                    ]
                 ];
             }
 

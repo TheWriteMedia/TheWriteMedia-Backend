@@ -35,6 +35,7 @@ public function store(Request $request)
         $fields = $request->validate([
             'unique_author_id' => 'nullable|string|max:255',
             'author_name' => 'required|string|max:255',
+            'author_pen_name' => 'nullable|string|max:255',
             'author_country' => 'required|string|max:255',
             'author_sex' => 'nullable|string|max:255',
             'author_age' => 'nullable|string|max:255',
@@ -43,7 +44,7 @@ public function store(Request $request)
             'author_city' => 'required|string|max:255',
             'author_contact_no' => 'required|string|max:255',
             'author_zip' => 'required|string|max:255',
-            'author_po_box' => 'required|string|max:255',
+            'author_po_box' => 'nullable|string|max:255',
             'user_email' => 'required|email|unique:users,user_email',
             'user_password' => 'required|confirmed|min:8',
             'user_profile' => 'required|string' // Validate image
@@ -64,6 +65,7 @@ public function store(Request $request)
             'user_id' => $user->id,
             'unique_author_id' => $fields['unique_author_id'],
             'author_name' => $fields['author_name'],
+            'author_pen_name' => $fields['author_pen_name'],
             'author_country' => $fields['author_country'],
             'author_sex' => $fields['author_sex'],
             'author_age' => $fields['author_age'],
@@ -123,6 +125,7 @@ public function store(Request $request)
             $fields = $request->validate([
                 'unique_author_id' => 'nullable|string|max:255',
                 'author_name' => 'required|string|max:255',
+                'author_pen_name' => 'nullable|string|max:255',
                 'author_country' => 'required|string|max:255',
                 'author_sex' => 'nullable|string|max:255',
                 'author_age' => 'nullable|string|max:255',
@@ -131,7 +134,7 @@ public function store(Request $request)
                 'author_city' => 'required|string|max:255',
                 'author_contact_no' => 'required|string|max:255',
                 'author_zip' => 'required|string|max:255',
-                'author_po_box' => 'required|string|max:255',
+                'author_po_box' => 'nullable|string|max:255',
                 'user_email' => 'required|email|unique:users,user_email,' . $user->id,
                 'user_password' => 'nullable|confirmed|min:8',
                 'user_profile' => 'nullable|string',
@@ -149,6 +152,7 @@ public function store(Request $request)
             $author->update([
                 'unique_author_id' => $fields['unique_author_id'],
                 'author_name' => $fields['author_name'],
+                'author_pen_name' => $fields['author_pen_name'],
                 'author_country' => $fields['author_country'],
                 'author_sex' => $fields['author_sex'],
                 'author_age' => $fields['author_age'],
